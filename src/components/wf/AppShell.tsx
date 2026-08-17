@@ -7,25 +7,31 @@ import {
   BarChart3,
   Bell,
   Boxes,
+  ChevronDown,
   ClipboardList,
   Cog,
   DoorOpen,
   LayoutGrid,
   LogOut,
   MapPin,
+  Menu,
+  Moon,
   PackageCheck,
   RefreshCw,
   ScrollText,
   Search,
   ShieldCheck,
   Split,
+  Sun,
   Truck,
   Users,
+  Warehouse,
 } from "lucide-react";
 import { useWf } from "@/lib/wf/store";
 import { canAccess, fmtAgo, type NavKey } from "@/lib/wf/engine";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import {
   CommandDialog,
   CommandEmpty,
@@ -34,9 +40,9 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { StatusBadge } from "@/components/wf/ui";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+
 
 
 const GROUP_ORDER = ["Command", "Operations", "Intelligence", "Management", "System"] as const;
