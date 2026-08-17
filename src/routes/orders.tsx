@@ -75,7 +75,7 @@ function Orders() {
 
   return (
     <>
-      <PageHeader title="Orders" subtitle={`${rows.length} orders matching current view`} />
+      <PageHeader eyebrow="Operations" title="Orders" subtitle={`${rows.length} orders matching current view`} />
 
       <div className="sticky top-[52px] z-10 -mx-4 mb-3 flex flex-wrap items-center gap-2 border-b border-border bg-background/95 px-4 py-2.5 shadow-sm backdrop-blur lg:-mx-6 lg:px-6">
         <div className="relative w-full max-w-xs">

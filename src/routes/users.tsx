@@ -48,7 +48,7 @@ function Users() {
 
   return (
     <>
-      <PageHeader title="Users & Roles" subtitle="Role-based access control across the platform" />
+      <PageHeader eyebrow="Management" title="Users & Roles" subtitle="Role-based access control across the platform" />
 
       <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
         <Kpi label="Users" value={state.employees.length} />

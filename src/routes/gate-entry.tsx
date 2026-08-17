@@ -74,7 +74,7 @@ function GateEntry() {
 
   return (
     <>
-      <PageHeader title="Gate Entry" subtitle="Vehicle movement control across NORTH GATE and SOUTH GATE" />
+      <PageHeader eyebrow="Operations" title="Gate Entry" subtitle="Vehicle movement control across NORTH GATE and SOUTH GATE" />
 
       <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
         <Kpi label="Vehicles inside" value={inside.length} tone={inside.length > 4 ? "amber" : "blue"} />

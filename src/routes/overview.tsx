@@ -59,6 +59,7 @@ function Overview() {
   return (
     <>
       <PageHeader
+        eyebrow="Command"
         title="Warehouse Control Tower"
         subtitle="Bangalore Hub — live operational picture across the fulfilment chain"
         action={

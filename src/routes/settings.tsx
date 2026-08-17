@@ -42,7 +42,7 @@ function Settings() {
 
   return (
     <>
-      <PageHeader title="Platform Settings" subtitle="Warehouse configuration and operating thresholds" />
+      <PageHeader eyebrow="System" title="Platform Settings" subtitle="Warehouse configuration and operating thresholds" />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel title="Warehouse profile">

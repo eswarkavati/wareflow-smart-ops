@@ -54,6 +54,7 @@ function Exceptions() {
   return (
     <>
       <PageHeader
+        eyebrow="Operations"
         title="Exception Command Center"
         subtitle={`${state.exceptions.filter((e) => e.status !== "Resolved").length} open · resolution required before SLA expiry`}
       />

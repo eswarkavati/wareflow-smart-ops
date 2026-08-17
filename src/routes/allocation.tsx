@@ -74,6 +74,7 @@ function Allocation() {
   return (
     <>
       <PageHeader
+        eyebrow="Operations"
         title="Allocation Center"
         subtitle={`${pending.length} orders awaiting an allocation decision`}
       />

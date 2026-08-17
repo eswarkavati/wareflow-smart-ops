@@ -56,6 +56,7 @@ function Inventory() {
   return (
     <>
       <PageHeader
+        eyebrow="Operations"
         title="Inventory"
         subtitle={`${state.products.length} SKUs across 7 zones · ${rows.length} in current view`}
       />
