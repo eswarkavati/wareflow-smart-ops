@@ -39,8 +39,10 @@ import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
 
+const GROUP_ORDER = ["Command", "Operations", "Intelligence", "Management", "System"] as const;
+
 const NAV: { key: NavKey; label: string; to: string; icon: typeof LayoutGrid; group: string }[] = [
-  { key: "overview", label: "Overview", to: "/overview", icon: LayoutGrid, group: "Operations" },
+  { key: "overview", label: "Overview", to: "/overview", icon: LayoutGrid, group: "Command" },
   { key: "orders", label: "Orders", to: "/orders", icon: ClipboardList, group: "Operations" },
   { key: "inventory", label: "Inventory", to: "/inventory", icon: Boxes, group: "Operations" },
   { key: "allocation", label: "Allocation", to: "/allocation", icon: Split, group: "Operations" },
@@ -50,12 +52,26 @@ const NAV: { key: NavKey; label: string; to: string; icon: typeof LayoutGrid; gr
   { key: "gate-entry", label: "Gate Entry", to: "/gate-entry", icon: DoorOpen, group: "Operations" },
   { key: "exceptions", label: "Exceptions", to: "/exceptions", icon: AlertTriangle, group: "Operations" },
   { key: "replenishment", label: "Replenishment", to: "/replenishment", icon: RefreshCw, group: "Operations" },
-  { key: "analytics", label: "Analytics", to: "/analytics", icon: BarChart3, group: "Operations" },
+  { key: "analytics", label: "Analytics", to: "/analytics", icon: BarChart3, group: "Intelligence" },
   { key: "employees", label: "Employees", to: "/employees", icon: Users, group: "Management" },
   { key: "users", label: "Users & Roles", to: "/users", icon: ShieldCheck, group: "Management" },
-  { key: "audit", label: "Audit Logs", to: "/audit", icon: ScrollText, group: "System" },
+  { key: "audit", label: "Audit Logs", to: "/audit", icon: ScrollText, group: "Management" },
   { key: "settings", label: "Settings", to: "/settings", icon: Cog, group: "System" },
 ];
+
+function useTheme() {
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  useEffect(() => {
+    const saved = (localStorage.getItem("wf-theme") as "light" | "dark" | null) ?? "light";
+    setTheme(saved);
+  }, []);
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    localStorage.setItem("wf-theme", theme);
+  }, [theme]);
+  return { theme, setTheme };
+}
+
 
 function Clock() {
   const [now, setNow] = useState(() => new Date());
