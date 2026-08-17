@@ -174,7 +174,8 @@ export function operationalKpis(state: WfState): KpiStat[] {
     fmt: (n: number) => string,
     goodWhenUp: boolean,
   ): KpiStat => {
-    const prev = value * seed(key);
+    const isPercent = fmt === p1;
+    const prev = isPercent ? Math.min(100, value * seed(key)) : value * seed(key);
     return {
       key,
       label,
