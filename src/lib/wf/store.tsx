@@ -63,7 +63,10 @@ interface Ctx {
   nextSyncAt: string;
   syncing: boolean;
   refreshNow: () => void;
+  liveUpdates: boolean;
+  setLiveUpdates: (v: boolean) => void;
 }
+
 
 const SYNC_INTERVAL_MS = 30 * 60 * 1000;
 const SIM_INTERVAL_MS = 90 * 1000;
