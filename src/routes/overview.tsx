@@ -156,6 +156,8 @@ function Overview() {
         </div>
 
         <div className="space-y-4">
+          <RequiresAttention />
+
           <Panel title="Warehouse health">
             <div className="flex items-baseline gap-2">
               <span className="tabular text-4xl font-semibold">{health.score}</span>
@@ -181,23 +183,6 @@ function Overview() {
             </div>
           </Panel>
 
-          <Panel title="Operational alerts" description="Rule-based signals from the last operating hour">
-            <div className="space-y-2">
-              {alerts.map((a) => (
-                <Link
-                  key={a.text}
-                  to={a.to}
-                  className="flex items-start gap-2 rounded-md border border-border px-3 py-2 transition-colors hover:bg-muted/60"
-                >
-                  <ShieldAlert
-                    className={cn("mt-0.5 h-3.5 w-3.5 shrink-0", a.tone === "red" ? "text-destructive" : "text-warning")}
-                  />
-                  <span className="text-xs text-foreground">{a.text}</span>
-                </Link>
-              ))}
-              {alerts.length === 0 ? <EmptyState title="No alerts" hint="Everything is running smoothly." /> : null}
-            </div>
-          </Panel>
 
           <GateActivity />
 
