@@ -18,6 +18,7 @@ import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as OverviewRouteImport } from './routes/overview'
 import { Route as PackingRouteImport } from './routes/packing'
 import { Route as PickingRouteImport } from './routes/picking'
+import { Route as ReplenishmentRouteImport } from './routes/replenishment'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -64,6 +65,11 @@ const PickingRoute = PickingRouteImport.update({
   path: '/picking',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReplenishmentRoute = ReplenishmentRouteImport.update({
+  id: '/replenishment',
+  path: '/replenishment',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/overview': typeof OverviewRoute
   '/packing': typeof PackingRoute
   '/picking': typeof PickingRoute
+  '/replenishment': typeof ReplenishmentRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByTo {
   '/overview': typeof OverviewRoute
   '/packing': typeof PackingRoute
   '/picking': typeof PickingRoute
+  '/replenishment': typeof ReplenishmentRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -98,6 +106,7 @@ export interface FileRoutesById {
   '/overview': typeof OverviewRoute
   '/packing': typeof PackingRoute
   '/picking': typeof PickingRoute
+  '/replenishment': typeof ReplenishmentRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -111,6 +120,7 @@ export interface FileRouteTypes {
     | '/overview'
     | '/packing'
     | '/picking'
+    | '/replenishment'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -122,6 +132,7 @@ export interface FileRouteTypes {
     | '/overview'
     | '/packing'
     | '/picking'
+    | '/replenishment'
   id:
     | '__root__'
     | '/'
@@ -133,6 +144,7 @@ export interface FileRouteTypes {
     | '/overview'
     | '/packing'
     | '/picking'
+    | '/replenishment'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -145,6 +157,7 @@ export interface RootRouteChildren {
   OverviewRoute: typeof OverviewRoute
   PackingRoute: typeof PackingRoute
   PickingRoute: typeof PickingRoute
+  ReplenishmentRoute: typeof ReplenishmentRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -212,6 +225,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PickingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/replenishment': {
+      id: '/replenishment'
+      path: '/replenishment'
+      fullPath: '/replenishment'
+      preLoaderRoute: typeof ReplenishmentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -225,6 +245,7 @@ const rootRouteChildren: RootRouteChildren = {
   OverviewRoute: OverviewRoute,
   PackingRoute: PackingRoute,
   PickingRoute: PickingRoute,
+  ReplenishmentRoute: ReplenishmentRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
