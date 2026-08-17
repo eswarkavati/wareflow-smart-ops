@@ -12,6 +12,7 @@ import {
   DoorOpen,
   LayoutGrid,
   LogOut,
+  MapPin,
   PackageCheck,
   RefreshCw,
   ScrollText,
@@ -33,7 +34,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatusBadge } from "@/components/wf/ui";
 import { cn } from "@/lib/utils";
 
@@ -206,7 +206,7 @@ function Notifications() {
 }
 
 export function AppShell({ navKey, children }: { navKey: NavKey; children: ReactNode }) {
-  const { state, user, logout } = useWf();
+  const { state, user, logout, lastSyncAt, syncing, refreshNow } = useWf();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [tick, setTick] = useState(0);
