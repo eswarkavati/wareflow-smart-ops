@@ -10,33 +10,141 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AllocationRouteImport } from './routes/allocation'
+import { Route as DispatchRouteImport } from './routes/dispatch'
+import { Route as ExceptionsRouteImport } from './routes/exceptions'
+import { Route as InventoryRouteImport } from './routes/inventory'
+import { Route as OrdersRouteImport } from './routes/orders'
+import { Route as OverviewRouteImport } from './routes/overview'
+import { Route as PackingRouteImport } from './routes/packing'
+import { Route as PickingRouteImport } from './routes/picking'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AllocationRoute = AllocationRouteImport.update({
+  id: '/allocation',
+  path: '/allocation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DispatchRoute = DispatchRouteImport.update({
+  id: '/dispatch',
+  path: '/dispatch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExceptionsRoute = ExceptionsRouteImport.update({
+  id: '/exceptions',
+  path: '/exceptions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InventoryRoute = InventoryRouteImport.update({
+  id: '/inventory',
+  path: '/inventory',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrdersRoute = OrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OverviewRoute = OverviewRouteImport.update({
+  id: '/overview',
+  path: '/overview',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PackingRoute = PackingRouteImport.update({
+  id: '/packing',
+  path: '/packing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PickingRoute = PickingRouteImport.update({
+  id: '/picking',
+  path: '/picking',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/allocation': typeof AllocationRoute
+  '/dispatch': typeof DispatchRoute
+  '/exceptions': typeof ExceptionsRoute
+  '/inventory': typeof InventoryRoute
+  '/orders': typeof OrdersRoute
+  '/overview': typeof OverviewRoute
+  '/packing': typeof PackingRoute
+  '/picking': typeof PickingRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/allocation': typeof AllocationRoute
+  '/dispatch': typeof DispatchRoute
+  '/exceptions': typeof ExceptionsRoute
+  '/inventory': typeof InventoryRoute
+  '/orders': typeof OrdersRoute
+  '/overview': typeof OverviewRoute
+  '/packing': typeof PackingRoute
+  '/picking': typeof PickingRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/allocation': typeof AllocationRoute
+  '/dispatch': typeof DispatchRoute
+  '/exceptions': typeof ExceptionsRoute
+  '/inventory': typeof InventoryRoute
+  '/orders': typeof OrdersRoute
+  '/overview': typeof OverviewRoute
+  '/packing': typeof PackingRoute
+  '/picking': typeof PickingRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/allocation'
+    | '/dispatch'
+    | '/exceptions'
+    | '/inventory'
+    | '/orders'
+    | '/overview'
+    | '/packing'
+    | '/picking'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/allocation'
+    | '/dispatch'
+    | '/exceptions'
+    | '/inventory'
+    | '/orders'
+    | '/overview'
+    | '/packing'
+    | '/picking'
+  id:
+    | '__root__'
+    | '/'
+    | '/allocation'
+    | '/dispatch'
+    | '/exceptions'
+    | '/inventory'
+    | '/orders'
+    | '/overview'
+    | '/packing'
+    | '/picking'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AllocationRoute: typeof AllocationRoute
+  DispatchRoute: typeof DispatchRoute
+  ExceptionsRoute: typeof ExceptionsRoute
+  InventoryRoute: typeof InventoryRoute
+  OrdersRoute: typeof OrdersRoute
+  OverviewRoute: typeof OverviewRoute
+  PackingRoute: typeof PackingRoute
+  PickingRoute: typeof PickingRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +156,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/allocation': {
+      id: '/allocation'
+      path: '/allocation'
+      fullPath: '/allocation'
+      preLoaderRoute: typeof AllocationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dispatch': {
+      id: '/dispatch'
+      path: '/dispatch'
+      fullPath: '/dispatch'
+      preLoaderRoute: typeof DispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/exceptions': {
+      id: '/exceptions'
+      path: '/exceptions'
+      fullPath: '/exceptions'
+      preLoaderRoute: typeof ExceptionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/inventory': {
+      id: '/inventory'
+      path: '/inventory'
+      fullPath: '/inventory'
+      preLoaderRoute: typeof InventoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/orders': {
+      id: '/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof OrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/overview': {
+      id: '/overview'
+      path: '/overview'
+      fullPath: '/overview'
+      preLoaderRoute: typeof OverviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/packing': {
+      id: '/packing'
+      path: '/packing'
+      fullPath: '/packing'
+      preLoaderRoute: typeof PackingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/picking': {
+      id: '/picking'
+      path: '/picking'
+      fullPath: '/picking'
+      preLoaderRoute: typeof PickingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AllocationRoute: AllocationRoute,
+  DispatchRoute: DispatchRoute,
+  ExceptionsRoute: ExceptionsRoute,
+  InventoryRoute: InventoryRoute,
+  OrdersRoute: OrdersRoute,
+  OverviewRoute: OverviewRoute,
+  PackingRoute: PackingRoute,
+  PickingRoute: PickingRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
