@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
+import { Link } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
+
 
 const TONES = {
   green: "bg-success/10 text-success border-success/25",
@@ -154,11 +156,15 @@ export function Kpi({
   value,
   hint,
   tone = "gray",
+  delta,
+  to,
 }: {
   label: string;
   value: string | number;
   hint?: string | undefined;
   tone?: Tone | undefined;
+  delta?: number | undefined;
+  to?: string | undefined;
 }) {
   const bar = {
     green: "bg-success",
@@ -167,15 +173,36 @@ export function Kpi({
     blue: "bg-info",
     gray: "bg-muted-foreground/40",
   }[tone];
-  return (
-    <div className="panel relative overflow-hidden px-4 py-3">
+  const body = (
+    <>
       <span className={cn("absolute inset-y-0 left-0 w-[3px]", bar)} />
       <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
       <p className="tabular mt-1 text-2xl font-semibold leading-none text-foreground">{value}</p>
+      {delta !== undefined ? (
+        <p
+          className={cn(
+            "tabular mt-1.5 text-[11px] font-medium",
+            delta >= 0 ? "text-success" : "text-destructive",
+          )}
+        >
+          {delta >= 0 ? "↑" : "↓"} {Math.abs(delta).toFixed(1)}% vs yesterday
+        </p>
+      ) : null}
       {hint ? <p className="mt-1.5 text-xs text-muted-foreground">{hint}</p> : null}
-    </div>
+    </>
   );
+  if (to)
+    return (
+      <Link
+        to={to}
+        className="panel relative block overflow-hidden px-4 py-3 transition-colors hover:border-primary/40 hover:bg-accent/40"
+      >
+        {body}
+      </Link>
+    );
+  return <div className="panel relative overflow-hidden px-4 py-3">{body}</div>;
 }
+
 
 export function Meta({ label, value }: { label: string; value: ReactNode }) {
   return (

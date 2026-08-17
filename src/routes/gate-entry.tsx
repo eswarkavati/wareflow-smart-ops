@@ -13,10 +13,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 import { useWf } from "@/lib/wf/store";
 import { fmtAgo, fmtTime } from "@/lib/wf/engine";
 import { GATES, gateStats } from "@/lib/wf/insights";
+import { gateCongestion } from "@/lib/wf/decisions";
 import type { GateEvent, GateId } from "@/lib/wf/types";
+
 
 export const Route = createFileRoute("/gate-entry")({
   ssr: false,
@@ -45,6 +48,9 @@ function GateEntry() {
   const [purpose, setPurpose] = useState<GateEvent["purpose"]>("Inbound");
   const [shipmentId, setShipmentId] = useState("none");
   const [filter, setFilter] = useState<"all" | GateId>("all");
+  const [dismissed, setDismissed] = useState(false);
+  const congestion = gateCongestion(state);
+
 
   const pending = state.inbound.filter((s) => s.status === "Scheduled");
   const inside = state.gateEvents.filter((g) => g.status === "Inside");
@@ -100,6 +106,46 @@ function GateEntry() {
           </Panel>
         ))}
       </div>
+
+      {congestion?.congested && !dismissed ? (
+        <Panel
+          title="Gate congestion detected"
+          description="WAREFLOW Decision Engine — inbound traffic balancing"
+          className="mb-4 border-primary/40"
+        >
+          <div className="flex flex-wrap items-start gap-4">
+            <div className="min-w-[260px] flex-1">
+              <p className="text-sm">
+                {congestion.deviation > 0 ? "NORTH GATE" : "SOUTH GATE"} traffic is{" "}
+                <span className="font-semibold text-primary">{Math.abs(congestion.deviation).toFixed(1)}%</span> above the
+                balanced load.
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {congestion.deviation > 0 ? "SOUTH GATE" : "NORTH GATE"} currently holds{" "}
+                {congestion.deviation > 0 ? congestion.south.inside : congestion.north.inside} vehicles and has spare dock
+                capacity. Redirecting inbound vehicles reduces dwell time and protects receiving slots.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                className="h-8 text-xs"
+                onClick={() => {
+                  setGate(congestion.deviation > 0 ? "SOUTH GATE" : "NORTH GATE");
+                  setDismissed(true);
+                  toast.success("Inbound vehicles redirected to the gate with spare capacity");
+                }}
+              >
+                Apply Recommendation
+              </Button>
+              <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => setDismissed(true)}>
+                Dismiss
+              </Button>
+            </div>
+          </div>
+        </Panel>
+      ) : null}
+
 
       <div className="grid gap-4 xl:grid-cols-[340px_minmax(0,1fr)]">
         <Panel title="Log vehicle entry" description="Entry against a scheduled inbound marks it as Arrived">

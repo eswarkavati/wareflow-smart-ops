@@ -63,7 +63,10 @@ interface Ctx {
   nextSyncAt: string;
   syncing: boolean;
   refreshNow: () => void;
+  liveUpdates: boolean;
+  setLiveUpdates: (v: boolean) => void;
 }
+
 
 const SYNC_INTERVAL_MS = 30 * 60 * 1000;
 const SIM_INTERVAL_MS = 90 * 1000;
@@ -81,6 +84,8 @@ export function WfProvider({ children }: { children: ReactNode }) {
   const [lastSyncAt, setLastSyncAt] = useState(() => new Date().toISOString());
   const [nextSyncAt, setNextSyncAt] = useState(() => new Date(Date.now() + SYNC_INTERVAL_MS).toISOString());
   const [syncing, setSyncing] = useState(false);
+  const [liveUpdates, setLiveUpdates] = useState(true);
+
 
   useEffect(() => {
     let initial: WfState | null = null;
@@ -134,7 +139,7 @@ export function WfProvider({ children }: { children: ReactNode }) {
 
   // Live operational simulation — small, realistic increments without reloads.
   useEffect(() => {
-    if (!state) return;
+    if (!state || !liveUpdates) return;
     const sim = window.setInterval(simulate, SIM_INTERVAL_MS);
     const sync = window.setInterval(() => {
       setSyncing(true);
@@ -148,7 +153,8 @@ export function WfProvider({ children }: { children: ReactNode }) {
       window.clearInterval(sync);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [!!state, simulate]);
+  }, [!!state, simulate, liveUpdates]);
+
 
   const log: Ctx["log"] = (draft, action, entity, from, to) => {
     draft.audit.unshift({
@@ -216,6 +222,9 @@ export function WfProvider({ children }: { children: ReactNode }) {
       nextSyncAt,
       syncing,
       refreshNow,
+      liveUpdates,
+      setLiveUpdates,
+
       login: (email) => {
         const acc = DEMO_ACCOUNTS.find((a) => a.email === email.trim().toLowerCase());
         const emp =
@@ -683,7 +692,7 @@ export function WfProvider({ children }: { children: ReactNode }) {
         }),
     };
     return ctx;
-  }, [state, update, commit, lastSyncAt, nextSyncAt, syncing, refreshNow]);
+  }, [state, update, commit, lastSyncAt, nextSyncAt, syncing, refreshNow, liveUpdates]);
 
   if (!state || !value) {
     return (

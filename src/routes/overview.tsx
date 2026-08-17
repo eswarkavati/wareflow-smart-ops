@@ -1,16 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowRight, ShieldAlert } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { AppShell } from "@/components/wf/AppShell";
 import { OrderDrawer } from "@/components/wf/OrderDrawer";
 import { EmptyState, Kpi, Panel, PageHeader, StatusBadge } from "@/components/wf/ui";
 import { Button } from "@/components/ui/button";
 import { useWf } from "@/lib/wf/store";
-import { bottleneck, fmtTime, healthScore, minutesUntil, stageCounts, stockStatus } from "@/lib/wf/engine";
+import { fmtTime, healthScore, minutesUntil, stageCounts, stockStatus } from "@/lib/wf/engine";
+
 import { Blueprint } from "@/components/wf/Blueprint";
 import { OverviewCharts } from "@/components/wf/OverviewCharts";
 import { GateActivity } from "@/components/wf/GateActivity";
+import { DecisionConsole, OpsBrief, RequiresAttention } from "@/components/wf/DecisionEngine";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/overview")({
   ssr: false,
@@ -45,22 +48,13 @@ function Overview() {
 
   const flow = stageCounts(orders);
   const health = healthScore(state);
-  const bn = bottleneck(state);
 
   const queue = [...orders]
     .filter((o) => o.stage !== "Dispatched")
     .sort((a, b) => b.score - a.score)
     .slice(0, 6);
 
-  const alerts = [
-    atRisk > 0 ? { tone: "red", text: `${atRisk} orders at risk of missing SLA`, to: "/orders" } : null,
-    ...state.products
-      .filter((p) => p.available > 0 && p.available <= p.reorderPoint * 0.5)
-      .slice(0, 2)
-      .map((p) => ({ tone: "amber", text: `SKU ${p.sku} has only ${p.available} units remaining`, to: "/replenishment" })),
-    { tone: "amber", text: bn.detail, to: "/analytics" },
-    openExc > 0 ? { tone: "red", text: `${openExc} exceptions awaiting resolution`, to: "/exceptions" } : null,
-  ].filter(Boolean) as { tone: string; text: string; to: string }[];
+
 
   return (
     <>
@@ -74,19 +68,23 @@ function Overview() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7">
-        <Kpi label="Orders Today" value={today} tone="blue" />
-        <Kpi label="Pending" value={pending} tone="gray" />
-        <Kpi label="Orders at Risk" value={atRisk} tone={atRisk ? "red" : "green"} />
-        <Kpi label="Low Stock SKUs" value={lowSkus} tone={lowSkus > 5 ? "amber" : "green"} />
-        <Kpi label="Picking Queue" value={pickQueue} tone="blue" />
-        <Kpi label="Dispatch Due" value={dispatchDue} tone="amber" />
-        <Kpi label="Exceptions" value={openExc} tone={openExc ? "red" : "green"} />
+      <OpsBrief />
+
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+        <Kpi label="Orders Today" value={today} tone="blue" delta={8.4} to="/orders" />
+        <Kpi label="Orders At Risk" value={atRisk} tone={atRisk ? "red" : "green"} delta={-2.1} to="/orders" />
+        <Kpi label="Inventory Risk" value={`${lowSkus} SKUs`} tone={lowSkus > 5 ? "amber" : "green"} to="/replenishment" />
+        <Kpi label="Active Picking" value={pickQueue} tone="blue" delta={5.2} to="/picking" />
+        <Kpi label="Ready to Ship" value={dispatchDue} tone="amber" to="/shipping" />
+        <Kpi label="Open Exceptions" value={openExc} tone={openExc ? "red" : "green"} to="/exceptions" />
       </div>
 
       <div className="mt-4 grid gap-4 xl:grid-cols-[2fr_1fr]">
         <div className="space-y-4">
+          <DecisionConsole />
+
           <Panel title="Order flow" description="Volume currently sitting at each stage of fulfilment">
+
             <div className="flex flex-wrap items-stretch gap-2">
               {(
                 [
@@ -150,6 +148,8 @@ function Overview() {
         </div>
 
         <div className="space-y-4">
+          <RequiresAttention />
+
           <Panel title="Warehouse health">
             <div className="flex items-baseline gap-2">
               <span className="tabular text-4xl font-semibold">{health.score}</span>
@@ -175,23 +175,6 @@ function Overview() {
             </div>
           </Panel>
 
-          <Panel title="Operational alerts" description="Rule-based signals from the last operating hour">
-            <div className="space-y-2">
-              {alerts.map((a) => (
-                <Link
-                  key={a.text}
-                  to={a.to}
-                  className="flex items-start gap-2 rounded-md border border-border px-3 py-2 transition-colors hover:bg-muted/60"
-                >
-                  <ShieldAlert
-                    className={cn("mt-0.5 h-3.5 w-3.5 shrink-0", a.tone === "red" ? "text-destructive" : "text-warning")}
-                  />
-                  <span className="text-xs text-foreground">{a.text}</span>
-                </Link>
-              ))}
-              {alerts.length === 0 ? <EmptyState title="No alerts" hint="Everything is running smoothly." /> : null}
-            </div>
-          </Panel>
 
           <GateActivity />
 
