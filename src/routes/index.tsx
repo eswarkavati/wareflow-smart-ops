@@ -63,46 +63,59 @@ function LoginPage() {
 
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.1fr_1fr]">
-      <div className="relative hidden overflow-hidden lg:block">
+      <div className="relative hidden overflow-hidden bg-sidebar lg:block">
         <img
           src={warehouseImg}
-          alt="Automated distribution warehouse racking and conveyor lines at dusk"
+          alt="Distribution warehouse racking and conveyor lines"
           width={1280}
           height={1600}
-          className="absolute inset-0 h-full w-full object-cover"
+          className="absolute inset-0 h-full w-full object-cover opacity-25 grayscale"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-sidebar/95 via-sidebar/80 to-sidebar/60" />
+        <div className="absolute inset-0 bg-[linear-gradient(160deg,oklch(0.18_0.01_264)_0%,oklch(0.22_0.03_26)_55%,oklch(0.30_0.10_27)_100%)] opacity-95" />
+        <svg className="absolute inset-0 h-full w-full opacity-[0.16]" aria-hidden="true">
+          <defs>
+            <pattern id="floor" width="48" height="48" patternUnits="userSpaceOnUse">
+              <path d="M48 0H0V48" fill="none" stroke="white" strokeWidth="0.6" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#floor)" />
+          <g fill="none" stroke="oklch(0.62 0.19 27)" strokeWidth="2">
+            <rect x="8%" y="34%" width="26%" height="7%" />
+            <rect x="8%" y="46%" width="26%" height="7%" />
+            <rect x="42%" y="34%" width="34%" height="7%" />
+            <rect x="42%" y="46%" width="34%" height="7%" />
+            <rect x="8%" y="66%" width="68%" height="10%" strokeDasharray="8 6" />
+          </g>
+        </svg>
         <div className="relative flex h-full flex-col justify-between p-10 text-sidebar-foreground">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded bg-sidebar-primary text-sidebar-primary-foreground">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <Boxes className="h-4 w-4" />
             </div>
-            <span className="text-sm font-semibold tracking-[0.28em] text-white">WAREFLOW</span>
+            <span className="text-sm font-semibold tracking-[0.28em] text-sidebar-foreground">WAREFLOW</span>
           </div>
 
           <div className="max-w-lg">
             <p className="text-[11px] uppercase tracking-[0.28em] text-sidebar-foreground/60">
               Bangalore Hub · Operational
             </p>
-            <h2 className="mt-3 text-3xl font-semibold leading-tight text-white">
+            <h2 className="mt-3 text-3xl font-semibold leading-tight text-sidebar-foreground">
               Intelligent Warehouse Operations
             </h2>
-            <p className="mt-4 text-sm leading-relaxed text-sidebar-foreground/75">
-              See the warehouse. Understand the risk. Make the decision.
-            </p>
+            <p className="mt-4 text-lg font-medium tracking-[0.08em] text-primary">See. Decide. Act.</p>
 
-            <dl className="mt-10 grid grid-cols-3 gap-4 border-t border-sidebar-border/70 pt-6 text-white">
+            <dl className="mt-10 grid grid-cols-3 gap-4 border-t border-sidebar-border/70 pt-6">
               <div>
                 <dt className="text-[11px] uppercase tracking-wider text-sidebar-foreground/50">Orders / day</dt>
-                <dd className="tabular text-2xl font-semibold">3,410</dd>
+                <dd className="tabular text-2xl font-semibold text-sidebar-foreground">3,410</dd>
               </div>
               <div>
                 <dt className="text-[11px] uppercase tracking-wider text-sidebar-foreground/50">On-time</dt>
-                <dd className="tabular text-2xl font-semibold">96.4%</dd>
+                <dd className="tabular text-2xl font-semibold text-sidebar-foreground">96.4%</dd>
               </div>
               <div>
                 <dt className="text-[11px] uppercase tracking-wider text-sidebar-foreground/50">Zones</dt>
-                <dd className="tabular text-2xl font-semibold">13</dd>
+                <dd className="tabular text-2xl font-semibold text-sidebar-foreground">13</dd>
               </div>
             </dl>
           </div>
@@ -112,6 +125,7 @@ function LoginPage() {
           </p>
         </div>
       </div>
+
 
       <div className="flex items-center justify-center bg-background px-6 py-12">
         <div className="w-full max-w-sm">
