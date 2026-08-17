@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useWf } from "@/lib/wf/store";
 import { bottleneck, fmtTime, healthScore, minutesUntil, stageCounts, stockStatus } from "@/lib/wf/engine";
 import { Blueprint } from "@/components/wf/Blueprint";
-import { DashboardStats } from "@/components/wf/DashboardStats";
+import { OverviewCharts } from "@/components/wf/OverviewCharts";
 import { GateActivity } from "@/components/wf/GateActivity";
 import { cn } from "@/lib/utils";
 
@@ -66,7 +66,7 @@ function Overview() {
     <>
       <PageHeader
         title="Warehouse Control Tower"
-        subtitle="BLR-01 · Bengaluru Hub — live operational picture across the fulfilment chain"
+        subtitle="Bangalore Hub — live operational picture across the fulfilment chain"
         action={
           <Button asChild size="sm" variant="outline">
             <Link to="/allocation">Open Allocation Center</Link>
@@ -226,11 +226,11 @@ function Overview() {
         </div>
       </div>
 
+      <OverviewCharts />
+
       <div className="mt-4">
         <Blueprint />
       </div>
-
-      <DashboardStats />
 
       <OrderDrawer orderId={open} onClose={() => setOpen(null)} />
     </>
