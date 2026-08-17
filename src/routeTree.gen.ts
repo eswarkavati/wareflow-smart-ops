@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AllocationRouteImport } from './routes/allocation'
 import { Route as AnalyticsRouteImport } from './routes/analytics'
+import { Route as AuditRouteImport } from './routes/audit'
 import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as EmployeesRouteImport } from './routes/employees'
 import { Route as ExceptionsRouteImport } from './routes/exceptions'
@@ -36,6 +37,11 @@ const AllocationRoute = AllocationRouteImport.update({
 const AnalyticsRoute = AnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuditRoute = AuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DispatchRoute = DispatchRouteImport.update({
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/allocation': typeof AllocationRoute
   '/analytics': typeof AnalyticsRoute
+  '/audit': typeof AuditRoute
   '/dispatch': typeof DispatchRoute
   '/employees': typeof EmployeesRoute
   '/exceptions': typeof ExceptionsRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/allocation': typeof AllocationRoute
   '/analytics': typeof AnalyticsRoute
+  '/audit': typeof AuditRoute
   '/dispatch': typeof DispatchRoute
   '/employees': typeof EmployeesRoute
   '/exceptions': typeof ExceptionsRoute
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/allocation': typeof AllocationRoute
   '/analytics': typeof AnalyticsRoute
+  '/audit': typeof AuditRoute
   '/dispatch': typeof DispatchRoute
   '/employees': typeof EmployeesRoute
   '/exceptions': typeof ExceptionsRoute
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/'
     | '/allocation'
     | '/analytics'
+    | '/audit'
     | '/dispatch'
     | '/employees'
     | '/exceptions'
@@ -156,6 +166,7 @@ export interface FileRouteTypes {
     | '/'
     | '/allocation'
     | '/analytics'
+    | '/audit'
     | '/dispatch'
     | '/employees'
     | '/exceptions'
@@ -171,6 +182,7 @@ export interface FileRouteTypes {
     | '/'
     | '/allocation'
     | '/analytics'
+    | '/audit'
     | '/dispatch'
     | '/employees'
     | '/exceptions'
@@ -187,6 +199,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AllocationRoute: typeof AllocationRoute
   AnalyticsRoute: typeof AnalyticsRoute
+  AuditRoute: typeof AuditRoute
   DispatchRoute: typeof DispatchRoute
   EmployeesRoute: typeof EmployeesRoute
   ExceptionsRoute: typeof ExceptionsRoute
@@ -220,6 +233,13 @@ declare module '@tanstack/react-router' {
       path: '/analytics'
       fullPath: '/analytics'
       preLoaderRoute: typeof AnalyticsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/audit': {
+      id: '/audit'
+      path: '/audit'
+      fullPath: '/audit'
+      preLoaderRoute: typeof AuditRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dispatch': {
@@ -299,6 +319,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AllocationRoute: AllocationRoute,
   AnalyticsRoute: AnalyticsRoute,
+  AuditRoute: AuditRoute,
   DispatchRoute: DispatchRoute,
   EmployeesRoute: EmployeesRoute,
   ExceptionsRoute: ExceptionsRoute,
