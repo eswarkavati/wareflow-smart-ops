@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { toast } from "sonner";
 import { buildSeed, DEMO_ACCOUNTS } from "./seed";
 import { allocationPlan, scoreOrder, stockStatus } from "./engine";
+import { simulateOperations } from "./simulate";
 import type {
   Employee,
   GateEvent,
