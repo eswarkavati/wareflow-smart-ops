@@ -77,15 +77,15 @@ function LoginPage() {
 
           <div className="max-w-lg">
             <p className="text-[11px] uppercase tracking-[0.28em] text-sidebar-foreground/60">
-              Bangalore Hub · BLR-01
+              Bangalore Hub · Operational
             </p>
             <h2 className="mt-3 text-3xl font-semibold leading-tight text-white">
-              See. Decide. Act. Verify.
+              Intelligent Warehouse Operations
             </h2>
             <p className="mt-4 text-sm leading-relaxed text-sidebar-foreground/75">
-              WAREFLOW scores order priority, resolves inventory conflicts, optimises pick routes and drives every
-              exception to closure with a complete audit trail.
+              See the warehouse. Understand the risk. Make the decision.
             </p>
+
             <dl className="mt-10 grid grid-cols-3 gap-4 border-t border-sidebar-border/70 pt-6 text-white">
               <div>
                 <dt className="text-[11px] uppercase tracking-wider text-sidebar-foreground/50">Orders / day</dt>
