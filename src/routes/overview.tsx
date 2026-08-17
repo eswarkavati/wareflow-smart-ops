@@ -10,7 +10,9 @@ import { bottleneck, fmtTime, healthScore, minutesUntil, stageCounts, stockStatu
 import { Blueprint } from "@/components/wf/Blueprint";
 import { OverviewCharts } from "@/components/wf/OverviewCharts";
 import { GateActivity } from "@/components/wf/GateActivity";
+import { DecisionConsole, OpsBrief, RequiresAttention } from "@/components/wf/DecisionEngine";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/overview")({
   ssr: false,
