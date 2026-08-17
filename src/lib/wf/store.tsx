@@ -212,6 +212,10 @@ export function WfProvider({ children }: { children: ReactNode }) {
       state,
       hydrated: true,
       user,
+      lastSyncAt,
+      nextSyncAt,
+      syncing,
+      refreshNow,
       login: (email) => {
         const acc = DEMO_ACCOUNTS.find((a) => a.email === email.trim().toLowerCase());
         const emp =
