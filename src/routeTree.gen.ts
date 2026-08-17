@@ -22,6 +22,7 @@ import { Route as OverviewRouteImport } from './routes/overview'
 import { Route as PackingRouteImport } from './routes/packing'
 import { Route as PickingRouteImport } from './routes/picking'
 import { Route as ReplenishmentRouteImport } from './routes/replenishment'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as UsersRouteImport } from './routes/users'
 
 const IndexRoute = IndexRouteImport.update({
@@ -89,6 +90,11 @@ const ReplenishmentRoute = ReplenishmentRouteImport.update({
   path: '/replenishment',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UsersRoute = UsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -109,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/packing': typeof PackingRoute
   '/picking': typeof PickingRoute
   '/replenishment': typeof ReplenishmentRoute
+  '/settings': typeof SettingsRoute
   '/users': typeof UsersRoute
 }
 export interface FileRoutesByTo {
@@ -125,6 +132,7 @@ export interface FileRoutesByTo {
   '/packing': typeof PackingRoute
   '/picking': typeof PickingRoute
   '/replenishment': typeof ReplenishmentRoute
+  '/settings': typeof SettingsRoute
   '/users': typeof UsersRoute
 }
 export interface FileRoutesById {
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/packing': typeof PackingRoute
   '/picking': typeof PickingRoute
   '/replenishment': typeof ReplenishmentRoute
+  '/settings': typeof SettingsRoute
   '/users': typeof UsersRoute
 }
 export interface FileRouteTypes {
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/packing'
     | '/picking'
     | '/replenishment'
+    | '/settings'
     | '/users'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -176,6 +186,7 @@ export interface FileRouteTypes {
     | '/packing'
     | '/picking'
     | '/replenishment'
+    | '/settings'
     | '/users'
   id:
     | '__root__'
@@ -192,6 +203,7 @@ export interface FileRouteTypes {
     | '/packing'
     | '/picking'
     | '/replenishment'
+    | '/settings'
     | '/users'
   fileRoutesById: FileRoutesById
 }
@@ -209,6 +221,7 @@ export interface RootRouteChildren {
   PackingRoute: typeof PackingRoute
   PickingRoute: typeof PickingRoute
   ReplenishmentRoute: typeof ReplenishmentRoute
+  SettingsRoute: typeof SettingsRoute
   UsersRoute: typeof UsersRoute
 }
 
@@ -305,6 +318,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ReplenishmentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/users': {
       id: '/users'
       path: '/users'
@@ -329,6 +349,7 @@ const rootRouteChildren: RootRouteChildren = {
   PackingRoute: PackingRoute,
   PickingRoute: PickingRoute,
   ReplenishmentRoute: ReplenishmentRoute,
+  SettingsRoute: SettingsRoute,
   UsersRoute: UsersRoute,
 }
 export const routeTree = rootRouteImport
