@@ -84,6 +84,8 @@ export function WfProvider({ children }: { children: ReactNode }) {
   const [lastSyncAt, setLastSyncAt] = useState(() => new Date().toISOString());
   const [nextSyncAt, setNextSyncAt] = useState(() => new Date(Date.now() + SYNC_INTERVAL_MS).toISOString());
   const [syncing, setSyncing] = useState(false);
+  const [liveUpdates, setLiveUpdates] = useState(true);
+
 
   useEffect(() => {
     let initial: WfState | null = null;
