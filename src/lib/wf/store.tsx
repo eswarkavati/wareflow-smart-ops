@@ -57,7 +57,15 @@ interface Ctx {
   advanceInbound: (id: string) => void;
   setInboundReceived: (id: string, sku: string, received: number, damaged: number) => void;
   completeInbound: (id: string) => void;
+  // live sync
+  lastSyncAt: string;
+  nextSyncAt: string;
+  syncing: boolean;
+  refreshNow: () => void;
 }
+
+const SYNC_INTERVAL_MS = 30 * 60 * 1000;
+const SIM_INTERVAL_MS = 90 * 1000;
 
 const WfCtx = createContext<Ctx | null>(null);
 
