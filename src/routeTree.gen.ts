@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AllocationRouteImport } from './routes/allocation'
+import { Route as AnalyticsRouteImport } from './routes/analytics'
 import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as ExceptionsRouteImport } from './routes/exceptions'
 import { Route as InventoryRouteImport } from './routes/inventory'
@@ -28,6 +29,11 @@ const IndexRoute = IndexRouteImport.update({
 const AllocationRoute = AllocationRouteImport.update({
   id: '/allocation',
   path: '/allocation',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnalyticsRoute = AnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DispatchRoute = DispatchRouteImport.update({
@@ -74,6 +80,7 @@ const ReplenishmentRoute = ReplenishmentRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/allocation': typeof AllocationRoute
+  '/analytics': typeof AnalyticsRoute
   '/dispatch': typeof DispatchRoute
   '/exceptions': typeof ExceptionsRoute
   '/inventory': typeof InventoryRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/allocation': typeof AllocationRoute
+  '/analytics': typeof AnalyticsRoute
   '/dispatch': typeof DispatchRoute
   '/exceptions': typeof ExceptionsRoute
   '/inventory': typeof InventoryRoute
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/allocation': typeof AllocationRoute
+  '/analytics': typeof AnalyticsRoute
   '/dispatch': typeof DispatchRoute
   '/exceptions': typeof ExceptionsRoute
   '/inventory': typeof InventoryRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/allocation'
+    | '/analytics'
     | '/dispatch'
     | '/exceptions'
     | '/inventory'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/allocation'
+    | '/analytics'
     | '/dispatch'
     | '/exceptions'
     | '/inventory'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/allocation'
+    | '/analytics'
     | '/dispatch'
     | '/exceptions'
     | '/inventory'
@@ -150,6 +162,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AllocationRoute: typeof AllocationRoute
+  AnalyticsRoute: typeof AnalyticsRoute
   DispatchRoute: typeof DispatchRoute
   ExceptionsRoute: typeof ExceptionsRoute
   InventoryRoute: typeof InventoryRoute
@@ -174,6 +187,13 @@ declare module '@tanstack/react-router' {
       path: '/allocation'
       fullPath: '/allocation'
       preLoaderRoute: typeof AllocationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/analytics': {
+      id: '/analytics'
+      path: '/analytics'
+      fullPath: '/analytics'
+      preLoaderRoute: typeof AnalyticsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dispatch': {
@@ -238,6 +258,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AllocationRoute: AllocationRoute,
+  AnalyticsRoute: AnalyticsRoute,
   DispatchRoute: DispatchRoute,
   ExceptionsRoute: ExceptionsRoute,
   InventoryRoute: InventoryRoute,
