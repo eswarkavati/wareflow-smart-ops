@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import warehouseImg from "@/assets/warehouse-login.jpg";
+import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/")({
   ssr: false,
@@ -32,6 +34,9 @@ function LoginPage() {
   const [password, setPassword] = useState("wareflow");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [remember, setRemember] = useState(true);
+  const [selected, setSelected] = useState<string | null>(null);
+
 
   useEffect(() => {
     if (user) void navigate({ to: "/overview", replace: true });
