@@ -683,7 +683,7 @@ export function WfProvider({ children }: { children: ReactNode }) {
         }),
     };
     return ctx;
-  }, [state, update, commit]);
+  }, [state, update, commit, lastSyncAt, nextSyncAt, syncing, refreshNow]);
 
   if (!state || !value) {
     return (
