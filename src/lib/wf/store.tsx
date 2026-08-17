@@ -114,6 +114,41 @@ export function WfProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const simulate = useCallback(() => {
+    const base = stateRef.current;
+    if (!base) return;
+    const draft: WfState = JSON.parse(JSON.stringify(base));
+    simulateOperations(draft);
+    rescore(draft);
+    commit(draft);
+  }, [commit]);
+
+  const refreshNow = useCallback(() => {
+    setSyncing(true);
+    simulate();
+    setLastSyncAt(new Date().toISOString());
+    setNextSyncAt(new Date(Date.now() + SYNC_INTERVAL_MS).toISOString());
+    window.setTimeout(() => setSyncing(false), 600);
+  }, [simulate]);
+
+  // Live operational simulation — small, realistic increments without reloads.
+  useEffect(() => {
+    if (!state) return;
+    const sim = window.setInterval(simulate, SIM_INTERVAL_MS);
+    const sync = window.setInterval(() => {
+      setSyncing(true);
+      simulate();
+      setLastSyncAt(new Date().toISOString());
+      setNextSyncAt(new Date(Date.now() + SYNC_INTERVAL_MS).toISOString());
+      window.setTimeout(() => setSyncing(false), 600);
+    }, SYNC_INTERVAL_MS);
+    return () => {
+      window.clearInterval(sim);
+      window.clearInterval(sync);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [!!state, simulate]);
+
   const log: Ctx["log"] = (draft, action, entity, from, to) => {
     draft.audit.unshift({
       id: uid("AUD"),
