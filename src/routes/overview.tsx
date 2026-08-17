@@ -1,12 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { ArrowRight, ShieldAlert } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { AppShell } from "@/components/wf/AppShell";
 import { OrderDrawer } from "@/components/wf/OrderDrawer";
 import { EmptyState, Kpi, Panel, PageHeader, StatusBadge } from "@/components/wf/ui";
 import { Button } from "@/components/ui/button";
 import { useWf } from "@/lib/wf/store";
-import { bottleneck, fmtTime, healthScore, minutesUntil, stageCounts, stockStatus } from "@/lib/wf/engine";
+import { fmtTime, healthScore, minutesUntil, stageCounts, stockStatus } from "@/lib/wf/engine";
+
 import { Blueprint } from "@/components/wf/Blueprint";
 import { OverviewCharts } from "@/components/wf/OverviewCharts";
 import { GateActivity } from "@/components/wf/GateActivity";
@@ -47,22 +48,13 @@ function Overview() {
 
   const flow = stageCounts(orders);
   const health = healthScore(state);
-  const bn = bottleneck(state);
 
   const queue = [...orders]
     .filter((o) => o.stage !== "Dispatched")
     .sort((a, b) => b.score - a.score)
     .slice(0, 6);
 
-  const alerts = [
-    atRisk > 0 ? { tone: "red", text: `${atRisk} orders at risk of missing SLA`, to: "/orders" } : null,
-    ...state.products
-      .filter((p) => p.available > 0 && p.available <= p.reorderPoint * 0.5)
-      .slice(0, 2)
-      .map((p) => ({ tone: "amber", text: `SKU ${p.sku} has only ${p.available} units remaining`, to: "/replenishment" })),
-    { tone: "amber", text: bn.detail, to: "/analytics" },
-    openExc > 0 ? { tone: "red", text: `${openExc} exceptions awaiting resolution`, to: "/exceptions" } : null,
-  ].filter(Boolean) as { tone: string; text: string; to: string }[];
+
 
   return (
     <>
