@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { toast } from "sonner";
 import { buildSeed, DEMO_ACCOUNTS } from "./seed";
 import { allocationPlan, scoreOrder, stockStatus } from "./engine";
+import { simulateOperations } from "./simulate";
 import type {
   Employee,
   GateEvent,
@@ -57,7 +58,15 @@ interface Ctx {
   advanceInbound: (id: string) => void;
   setInboundReceived: (id: string, sku: string, received: number, damaged: number) => void;
   completeInbound: (id: string) => void;
+  // live sync
+  lastSyncAt: string;
+  nextSyncAt: string;
+  syncing: boolean;
+  refreshNow: () => void;
 }
+
+const SYNC_INTERVAL_MS = 30 * 60 * 1000;
+const SIM_INTERVAL_MS = 90 * 1000;
 
 const WfCtx = createContext<Ctx | null>(null);
 
@@ -69,6 +78,9 @@ function rescore(draft: WfState) {
 export function WfProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<WfState | null>(null);
   const stateRef = useRef<WfState | null>(null);
+  const [lastSyncAt, setLastSyncAt] = useState(() => new Date().toISOString());
+  const [nextSyncAt, setNextSyncAt] = useState(() => new Date(Date.now() + SYNC_INTERVAL_MS).toISOString());
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     let initial: WfState | null = null;
@@ -102,6 +114,41 @@ export function WfProvider({ children }: { children: ReactNode }) {
       /* storage full — in-memory state still authoritative */
     }
   }, []);
+
+  const simulate = useCallback(() => {
+    const base = stateRef.current;
+    if (!base) return;
+    const draft: WfState = JSON.parse(JSON.stringify(base));
+    simulateOperations(draft);
+    rescore(draft);
+    commit(draft);
+  }, [commit]);
+
+  const refreshNow = useCallback(() => {
+    setSyncing(true);
+    simulate();
+    setLastSyncAt(new Date().toISOString());
+    setNextSyncAt(new Date(Date.now() + SYNC_INTERVAL_MS).toISOString());
+    window.setTimeout(() => setSyncing(false), 600);
+  }, [simulate]);
+
+  // Live operational simulation — small, realistic increments without reloads.
+  useEffect(() => {
+    if (!state) return;
+    const sim = window.setInterval(simulate, SIM_INTERVAL_MS);
+    const sync = window.setInterval(() => {
+      setSyncing(true);
+      simulate();
+      setLastSyncAt(new Date().toISOString());
+      setNextSyncAt(new Date(Date.now() + SYNC_INTERVAL_MS).toISOString());
+      window.setTimeout(() => setSyncing(false), 600);
+    }, SYNC_INTERVAL_MS);
+    return () => {
+      window.clearInterval(sim);
+      window.clearInterval(sync);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [!!state, simulate]);
 
   const log: Ctx["log"] = (draft, action, entity, from, to) => {
     draft.audit.unshift({
@@ -165,6 +212,10 @@ export function WfProvider({ children }: { children: ReactNode }) {
       state,
       hydrated: true,
       user,
+      lastSyncAt,
+      nextSyncAt,
+      syncing,
+      refreshNow,
       login: (email) => {
         const acc = DEMO_ACCOUNTS.find((a) => a.email === email.trim().toLowerCase());
         const emp =
@@ -632,7 +683,7 @@ export function WfProvider({ children }: { children: ReactNode }) {
         }),
     };
     return ctx;
-  }, [state, update, commit]);
+  }, [state, update, commit, lastSyncAt, nextSyncAt, syncing, refreshNow]);
 
   if (!state || !value) {
     return (

@@ -47,7 +47,7 @@ function Settings() {
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel title="Warehouse profile">
           <div className="grid grid-cols-2 gap-3">
-            <Meta label="Facility" value="WH-MUM-01 · Bhiwandi" />
+            <Meta label="Facility" value="BLR-01 · Bangalore Hub" />
             <Meta label="Zones" value="A – F (6 aisles)" />
             <Meta label="Operating hours" value="24 × 7 · 3 shifts" />
             <Meta label="Signed in as" value={`${user?.name ?? "—"} (${user?.role ?? "—"})`} />

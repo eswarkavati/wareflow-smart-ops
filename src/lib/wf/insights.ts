@@ -235,132 +235,158 @@ export function gateStats(state: WfState) {
   });
 }
 
-/** Zone level activity for the warehouse blueprint. */
-export function zoneActivity(state: WfState) {
-  const skuZone = (sku: string) => state.products.find((p) => p.sku === sku)?.zone ?? "";
-  const inZone = (prefix: string) => state.products.filter((p) => p.zone.startsWith(prefix));
 
-  const picking = state.pickTasks.filter((t) => t.status !== "Completed");
-  const packing = state.orders.filter((o) => o.stage === "Packed");
-  const qc = state.orders.filter((o) => o.stage === "QC");
-  const shipping = state.orders.filter((o) => o.stage === "Dispatched");
-  const damagedUnits = state.products.reduce((s, p) => s + p.damaged, 0);
-  const returns = state.exceptions.filter((e) => e.type === "Damaged Item" || e.type === "QC Failure");
-  const inboundActive = state.inbound.filter((s) => s.status !== "Received" && s.status !== "Scheduled");
-  const staff = state.employees.filter((e) => e.status === "Active");
+/* ---------------- Warehouse floor plan (blueprint) ---------------- */
 
-  const storage = (letter: string) => {
-    const items = inZone(letter);
-    const units = items.reduce((s, p) => s + p.available, 0);
-    const cap = Math.max(1, items.length * 200);
-    return {
-      load: Math.min(100, Math.round((units / cap) * 100)),
-      metrics: [
-        { label: "SKUs", value: `${items.length}` },
-        { label: "Units on hand", value: `${units}` },
-        { label: "Low stock SKUs", value: `${items.filter((p) => stockStatus(p) !== "Healthy").length}` },
-        { label: "Pick tasks routed", value: `${picking.filter((t) => t.route.some((r) => r.startsWith(letter))).length}` },
-      ],
-    };
-  };
+export type ZoneStatus = "Normal" | "High Activity" | "Issue" | "Active Operation";
 
-  const pickersActive = state.employees.filter((e) => e.role === "Picker" && e.status === "Active").length;
-
-  return {
-    receiving: {
-      load: Math.min(100, inboundActive.length * 30),
-      metrics: [
-        { label: "Vehicles at dock", value: `${inboundActive.length}` },
-        { label: "Scheduled today", value: `${state.inbound.filter((s) => s.status === "Scheduled").length}` },
-        { label: "Received", value: `${state.inbound.filter((s) => s.status === "Received").length}` },
-        { label: "Discrepancies", value: `${state.inbound.filter((s) => s.status === "Discrepancy").length}` },
-      ],
-    },
-    storageA: storage("A"),
-    storageB: storage("B"),
-    storageC: storage("C"),
-    picking: {
-      load: Math.min(100, picking.length * 12),
-      metrics: [
-        { label: "Open tasks", value: `${picking.length}` },
-        { label: "Blocked", value: `${picking.filter((t) => t.status === "Blocked").length}` },
-        { label: "Active pickers", value: `${pickersActive}` },
-        { label: "Lines to pick", value: `${picking.reduce((s, t) => s + t.items.length, 0)}` },
-      ],
-    },
-    packing: {
-      load: Math.min(100, packing.length * 14),
-      metrics: [
-        { label: "Awaiting pack", value: `${packing.length}` },
-        { label: "Stations", value: "PACK-1 · PACK-2" },
-        { label: "Packers on shift", value: `${state.employees.filter((e) => e.role === "Packer").length}` },
-        { label: "Avg pack time", value: "6 min" },
-      ],
-    },
-    qc: {
-      load: Math.min(100, qc.length * 16),
-      metrics: [
-        { label: "In queue", value: `${qc.filter((o) => o.qc !== "Passed").length}` },
-        { label: "Passed", value: `${qc.filter((o) => o.qc === "Passed").length}` },
-        { label: "Failures open", value: `${state.exceptions.filter((e) => e.type === "QC Failure" && e.status !== "Resolved").length}` },
-        { label: "Stations", value: "QC-1 · QC-2" },
-      ],
-    },
-    shipping: {
-      load: Math.min(100, state.orders.filter((o) => o.stage === "QC" && o.qc === "Passed").length * 18),
-      metrics: [
-        { label: "Ready to dispatch", value: `${state.orders.filter((o) => o.stage === "QC" && o.qc === "Passed").length}` },
-        { label: "Dispatched today", value: `${shipping.length}` },
-        { label: "Carriers active", value: "4" },
-        { label: "Outbound vehicles", value: `${state.gateEvents.filter((g) => g.purpose === "Outbound" && g.status === "Inside").length}` },
-      ],
-    },
-    returns: {
-      load: Math.min(100, returns.length * 20),
-      metrics: [
-        { label: "Return cases", value: `${returns.length}` },
-        { label: "Awaiting inspection", value: `${returns.filter((e) => e.status === "Open").length}` },
-        { label: "Restocked today", value: `${state.txns.filter((t) => t.action === "Restocked").length}` },
-        { label: "Linked SKUs", value: `${new Set(returns.map((r) => r.sku ?? skuZone("")).filter(Boolean)).size}` },
-      ],
-    },
-    damaged: {
-      load: Math.min(100, damagedUnits * 2),
-      metrics: [
-        { label: "Damaged units", value: `${damagedUnits}` },
-        { label: "SKUs affected", value: `${state.products.filter((p) => p.damaged > 0).length}` },
-        { label: "Write-off value", value: `₹${state.products.reduce((s, p) => s + p.damaged * p.price, 0).toLocaleString("en-IN")}` },
-        { label: "Open cases", value: `${state.exceptions.filter((e) => e.type === "Damaged Item" && e.status !== "Resolved").length}` },
-      ],
-    },
-    staff: {
-      load: Math.min(100, Math.round((staff.length / Math.max(1, state.employees.length)) * 100)),
-      metrics: [
-        { label: "On shift", value: `${staff.length}` },
-        { label: "On break", value: `${state.employees.filter((e) => e.status === "On Break").length}` },
-        { label: "Avg efficiency", value: `${Math.round(state.employees.reduce((s, e) => s + e.efficiency, 0) / Math.max(1, state.employees.length))}%` },
-        { label: "Total headcount", value: `${state.employees.length}` },
-      ],
-    },
-    northGate: {
-      load: Math.min(100, state.gateEvents.filter((g) => g.gate === "NORTH GATE" && g.status === "Inside").length * 30),
-      metrics: [
-        { label: "Vehicles inside", value: `${state.gateEvents.filter((g) => g.gate === "NORTH GATE" && g.status === "Inside").length}` },
-        { label: "Movements logged", value: `${state.gateEvents.filter((g) => g.gate === "NORTH GATE").length}` },
-        { label: "Inbound", value: `${state.gateEvents.filter((g) => g.gate === "NORTH GATE" && g.purpose === "Inbound").length}` },
-        { label: "Outbound", value: `${state.gateEvents.filter((g) => g.gate === "NORTH GATE" && g.purpose === "Outbound").length}` },
-      ],
-    },
-    southGate: {
-      load: Math.min(100, state.gateEvents.filter((g) => g.gate === "SOUTH GATE" && g.status === "Inside").length * 30),
-      metrics: [
-        { label: "Vehicles inside", value: `${state.gateEvents.filter((g) => g.gate === "SOUTH GATE" && g.status === "Inside").length}` },
-        { label: "Movements logged", value: `${state.gateEvents.filter((g) => g.gate === "SOUTH GATE").length}` },
-        { label: "Inbound", value: `${state.gateEvents.filter((g) => g.gate === "SOUTH GATE" && g.purpose === "Inbound").length}` },
-        { label: "Outbound", value: `${state.gateEvents.filter((g) => g.gate === "SOUTH GATE" && g.purpose === "Outbound").length}` },
-      ],
-    },
-  };
+export interface FloorZone {
+  key: string;
+  label: string;
+  status: ZoneStatus;
+  load: number;
+  metrics: { label: string; value: string }[];
 }
 
-export type ZoneActivity = ReturnType<typeof zoneActivity>;
+export type FloorZones = Record<string, FloorZone>;
+
+function statusFor(load: number, issue: boolean): ZoneStatus {
+  if (issue) return "Issue";
+  if (load >= 75) return "High Activity";
+  if (load > 0) return "Active Operation";
+  return "Normal";
+}
+
+/** Live zone telemetry for the warehouse layout, derived from application state. */
+export function floorZones(state: WfState): FloorZones {
+  const zones: FloorZone[] = [];
+  const add = (
+    key: string,
+    label: string,
+    load: number,
+    issue: boolean,
+    metrics: { label: string; value: string }[],
+  ) => zones.push({ key, label, load: Math.min(100, Math.max(0, Math.round(load))), status: statusFor(load, issue), metrics });
+
+  const openPicks = state.pickTasks.filter((t) => t.status !== "Completed");
+  const blocked = state.pickTasks.filter((t) => t.status === "Blocked");
+  const pickers = state.employees.filter((e) => e.role === "Picker" && e.status === "Active");
+  const inboundActive = state.inbound.filter((s) => s.status !== "Received" && s.status !== "Scheduled");
+  const avgPick = openPicks.length
+    ? +(openPicks.reduce((s, t) => s + t.etaMin, 0) / openPicks.length).toFixed(1)
+    : 0;
+
+  // Gates
+  (["NORTH GATE", "SOUTH GATE"] as GateId[]).forEach((gate, i) => {
+    const events = state.gateEvents.filter((g) => g.gate === gate);
+    const inside = events.filter((g) => g.status === "Inside");
+    const exits = events.filter((g) => g.exitAt);
+    const queue = state.inbound.filter((s) => s.gate === gate && s.status === "Arrived").length;
+    add(i === 0 ? "northGate" : "southGate", gate === "NORTH GATE" ? "North Gate" : "South Gate", inside.length * 25, queue > 2, [
+      { label: "Vehicles Inside", value: `${inside.length}` },
+      { label: "Entries Today", value: `${events.length}` },
+      { label: "Exits Today", value: `${exits.length}` },
+      { label: "Current Queue", value: `${queue}` },
+    ]);
+  });
+
+  // Receiving docks
+  [1, 2].forEach((n) => {
+    const atDock = state.inbound.filter((s) => s.dock === `DOCK-0${n}` || (inboundActive.length > 0 && n === 1));
+    const active = inboundActive.filter((_, idx) => idx % 2 === n - 1);
+    add(`dock0${n}`, `Receiving Dock 0${n}`, active.length * 40, false, [
+      { label: "Vehicles At Dock", value: `${active.length}` },
+      { label: "Scheduled", value: `${state.inbound.filter((s) => s.status === "Scheduled").length}` },
+      { label: "Linked Shipments", value: `${atDock.length}` },
+      { label: "Received Today", value: `${state.inbound.filter((s) => s.status === "Received").length}` },
+    ]);
+  });
+
+  const discrepancies = state.inbound.filter((s) => s.status === "Discrepancy");
+  add("import", "Import Goods Processing", inboundActive.length * 25, discrepancies.length > 0, [
+    { label: "In Processing", value: `${inboundActive.length}` },
+    { label: "Awaiting Verification", value: `${state.inbound.filter((s) => s.status === "Verification").length}` },
+    { label: "Discrepancies", value: `${discrepancies.length}` },
+    { label: "Units Expected", value: `${state.inbound.reduce((s, x) => s + x.lines.reduce((a, l) => a + l.expectedQty, 0), 0)}` },
+  ]);
+
+  // Storage zones
+  (["A", "B", "C"] as const).forEach((letter) => {
+    const items = state.products.filter((p) => p.zone.startsWith(letter));
+    const units = items.reduce((s, p) => s + p.available, 0);
+    const cap = Math.max(1, items.length * 200);
+    const load = (units / cap) * 100;
+    const tasks = openPicks.filter((t) => t.route.some((r) => r.startsWith(letter)));
+    const staff = state.employees.filter((e) => e.zone.startsWith(letter) && e.status === "Active");
+    const lowSkus = items.filter((p) => stockStatus(p) !== "Healthy" && stockStatus(p) !== "Overstock");
+    add(`storage${letter}`, `Storage Zone ${letter}`, load, lowSkus.length > items.length * 0.35, [
+      { label: "Current Inventory", value: `${units.toLocaleString("en-IN")} units` },
+      { label: "Active Pick Tasks", value: `${tasks.length}` },
+      { label: "Employees", value: `${staff.length}` },
+      { label: "Capacity", value: `${Math.min(100, Math.round(load))}%` },
+      { label: "SKUs", value: `${items.length}` },
+      { label: "Low Stock SKUs", value: `${lowSkus.length}` },
+    ]);
+  });
+
+  add("picking", "Picking Zone", openPicks.length * 12, blocked.length > 0, [
+    { label: "Active Pickers", value: `${pickers.length}` },
+    { label: "Pending Tasks", value: `${openPicks.filter((t) => t.status === "Pending").length}` },
+    { label: "In Progress", value: `${openPicks.filter((t) => t.status === "Picking").length}` },
+    { label: "Average Pick Time", value: `${avgPick || 8.4} min` },
+    { label: "Blocked", value: `${blocked.length}` },
+    { label: "Lines To Pick", value: `${openPicks.reduce((s, t) => s + t.items.length, 0)}` },
+  ]);
+
+  const packing = state.orders.filter((o) => o.stage === "Packed");
+  add("packing", "Packing Stations", packing.length * 14, false, [
+    { label: "Awaiting Pack", value: `${packing.length}` },
+    { label: "Stations", value: "PACK-1 · PACK-2" },
+    { label: "Packers On Shift", value: `${state.employees.filter((e) => e.role === "Packer" && e.status === "Active").length}` },
+    { label: "Average Pack Time", value: "6.0 min" },
+  ]);
+
+  const qcQueue = state.orders.filter((o) => o.stage === "QC" && o.qc !== "Passed");
+  const qcFails = state.exceptions.filter((e) => e.type === "QC Failure" && e.status !== "Resolved");
+  add("qc", "Quality Check", qcQueue.length * 16, qcFails.length > 0, [
+    { label: "In Queue", value: `${qcQueue.length}` },
+    { label: "Passed", value: `${state.orders.filter((o) => o.qc === "Passed").length}` },
+    { label: "Open Failures", value: `${qcFails.length}` },
+    { label: "Stations", value: "QC-1 · QC-2" },
+  ]);
+
+  const ready = state.orders.filter((o) => o.stage === "QC" && o.qc === "Passed");
+  const dispatched = state.orders.filter((o) => o.stage === "Dispatched");
+  const delayed = state.orders.filter((o) => o.atRisk && o.stage !== "Dispatched");
+  add("shipping", "Shipping / Dispatch", ready.length * 18, delayed.length > 3, [
+    { label: "Ready to Ship", value: `${ready.length}` },
+    { label: "Awaiting Pickup", value: `${state.gateEvents.filter((g) => g.purpose === "Outbound" && g.status === "Inside").length}` },
+    { label: "Delayed", value: `${delayed.length}` },
+    { label: "Dispatched Today", value: `${dispatched.length}` },
+  ]);
+
+  add("loading", "Loading Docks", ready.length * 12, false, [
+    { label: "Bays", value: "SHIP-01 · SHIP-02 · SHIP-03" },
+    { label: "Loads Staged", value: `${ready.length}` },
+    { label: "Outbound Vehicles", value: `${state.gateEvents.filter((g) => g.purpose === "Outbound" && g.status === "Inside").length}` },
+    { label: "Carriers Active", value: "4" },
+  ]);
+
+  const returns = state.exceptions.filter((e) => e.type === "Damaged Item" || e.type === "QC Failure");
+  add("returns", "Returns Area", returns.length * 18, returns.filter((e) => e.status === "Open").length > 3, [
+    { label: "Return Cases", value: `${returns.length}` },
+    { label: "Awaiting Inspection", value: `${returns.filter((e) => e.status === "Open").length}` },
+    { label: "Restocked", value: `${state.txns.filter((t) => t.action === "Restocked").length}` },
+    { label: "Resolved", value: `${returns.filter((e) => e.status === "Resolved").length}` },
+  ]);
+
+  const damagedUnits = state.products.reduce((s, p) => s + p.damaged, 0);
+  add("damaged", "Damaged Goods", Math.min(100, damagedUnits * 2), damagedUnits > 40, [
+    { label: "Damaged Units", value: `${damagedUnits}` },
+    { label: "SKUs Affected", value: `${state.products.filter((p) => p.damaged > 0).length}` },
+    { label: "Write-off Value", value: `₹${state.products.reduce((s, p) => s + p.damaged * p.price, 0).toLocaleString("en-IN")}` },
+    { label: "Open Cases", value: `${state.exceptions.filter((e) => e.type === "Damaged Item" && e.status !== "Resolved").length}` },
+  ]);
+
+  return Object.fromEntries(zones.map((z) => [z.key, z]));
+}
