@@ -35,7 +35,9 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { StatusBadge } from "@/components/wf/ui";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+
 
 const NAV: { key: NavKey; label: string; to: string; icon: typeof LayoutGrid; group: string }[] = [
   { key: "overview", label: "Overview", to: "/overview", icon: LayoutGrid, group: "Operations" },
@@ -206,7 +208,7 @@ function Notifications() {
 }
 
 export function AppShell({ navKey, children }: { navKey: NavKey; children: ReactNode }) {
-  const { state, user, logout, lastSyncAt, syncing, refreshNow } = useWf();
+  const { state, user, logout, lastSyncAt, nextSyncAt, syncing, refreshNow, liveUpdates, setLiveUpdates } = useWf();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [tick, setTick] = useState(0);
@@ -307,7 +309,7 @@ export function AppShell({ navKey, children }: { navKey: NavKey; children: React
         <header className="sticky top-0 z-20 flex flex-wrap items-center gap-3 border-b border-border bg-card/95 px-4 py-2.5 backdrop-blur">
           <div className="flex items-center gap-2 rounded-md border border-border bg-surface px-2.5 py-1">
             <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-xs font-medium">BLR-01 · Bangalore Hub</span>
+            <span className="text-xs font-medium">Bangalore Hub</span>
           </div>
           <StatusBadge value="Operational" tone="green" />
           <Clock />
@@ -315,16 +317,33 @@ export function AppShell({ navKey, children }: { navKey: NavKey; children: React
             <GlobalSearch />
             <Notifications />
           </div>
+          <div className="flex items-center gap-2 rounded-md border border-border bg-card px-2 py-1">
+            <Switch
+              id="live-updates"
+              checked={liveUpdates}
+              onCheckedChange={setLiveUpdates}
+              aria-label="Toggle live updates"
+            />
+            <label htmlFor="live-updates" className="cursor-pointer text-[11px] font-medium text-muted-foreground">
+              Live Updates {liveUpdates ? "ON" : "OFF"}
+            </label>
+          </div>
           <button
             onClick={refreshNow}
             title="Automatic sync every 30 minutes — click to sync now"
             className="tabular flex items-center gap-1.5 rounded-md border border-border bg-card px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
           >
-            <RefreshCw className={cn("h-3 w-3", syncing && "animate-spin text-info")} />
+            <RefreshCw className={cn("h-3 w-3", syncing && "animate-spin text-primary")} />
             {syncing ? "Syncing…" : `Last updated ${fmtAgo(lastSyncAt)}`}
+            {!syncing && liveUpdates ? (
+              <span className="hidden text-muted-foreground/70 lg:inline">
+                · next in {Math.max(0, Math.round((new Date(nextSyncAt).getTime() - Date.now()) / 60000))}m
+              </span>
+            ) : null}
             <span className="hidden">{tick}</span>
           </button>
         </header>
+
 
         <main className="min-w-0 flex-1 p-4 lg:p-6">
           {denied ? (
