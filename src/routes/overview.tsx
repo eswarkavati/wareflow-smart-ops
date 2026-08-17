@@ -7,6 +7,9 @@ import { EmptyState, Kpi, Panel, PageHeader, StatusBadge } from "@/components/wf
 import { Button } from "@/components/ui/button";
 import { useWf } from "@/lib/wf/store";
 import { bottleneck, fmtTime, healthScore, minutesUntil, stageCounts, stockStatus } from "@/lib/wf/engine";
+import { Blueprint } from "@/components/wf/Blueprint";
+import { DashboardStats } from "@/components/wf/DashboardStats";
+import { GateActivity } from "@/components/wf/GateActivity";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/overview")({
@@ -190,6 +193,8 @@ function Overview() {
             </div>
           </Panel>
 
+          <GateActivity />
+
           <Panel title="Critical exceptions">
             <div className="space-y-2">
               {state.exceptions
@@ -220,6 +225,12 @@ function Overview() {
           </Panel>
         </div>
       </div>
+
+      <div className="mt-4">
+        <Blueprint />
+      </div>
+
+      <DashboardStats />
 
       <OrderDrawer orderId={open} onClose={() => setOpen(null)} />
     </>

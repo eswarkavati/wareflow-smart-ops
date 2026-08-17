@@ -3,7 +3,17 @@ import type { ReactNode } from "react";
 import { toast } from "sonner";
 import { buildSeed, DEMO_ACCOUNTS } from "./seed";
 import { allocationPlan, scoreOrder, stockStatus } from "./engine";
-import type { Employee, Notification, Order, Product, WfException, WfState } from "./types";
+import type {
+  Employee,
+  GateEvent,
+  GateId,
+  InboundShipment,
+  Notification,
+  Order,
+  Product,
+  WfException,
+  WfState,
+} from "./types";
 
 const KEY = "wareflow.state.v1";
 
@@ -34,6 +44,19 @@ interface Ctx {
   createReplenishment: (sku: string, qty: number) => void;
   updateEmployee: (id: string, patch: Partial<Employee>) => void;
   markNotification: (id?: string) => void;
+  // gate entry & inbound
+  recordGateEntry: (payload: {
+    gate: GateId;
+    vehicleNo: string;
+    driver: string;
+    transporter: string;
+    purpose: GateEvent["purpose"];
+    shipmentId?: string;
+  }) => void;
+  recordGateExit: (id: string) => void;
+  advanceInbound: (id: string) => void;
+  setInboundReceived: (id: string, sku: string, received: number, damaged: number) => void;
+  completeInbound: (id: string) => void;
 }
 
 const WfCtx = createContext<Ctx | null>(null);
@@ -56,6 +79,15 @@ export function WfProvider({ children }: { children: ReactNode }) {
       initial = null;
     }
     if (!initial || !initial.orders?.length) initial = buildSeed();
+    if (!initial.inbound || !initial.gateEvents) {
+      const fresh = buildSeed();
+      initial.inbound = initial.inbound ?? fresh.inbound;
+      initial.gateEvents = initial.gateEvents ?? fresh.gateEvents;
+      initial.employees = fresh.employees.reduce<typeof fresh.employees>((acc, e) => {
+        if (!acc.some((x) => x.id === e.id)) acc.push(e);
+        return acc;
+      }, [...initial.employees]);
+    }
     rescore(initial);
     stateRef.current = initial;
     setState({ ...initial });
@@ -475,6 +507,121 @@ export function WfProvider({ children }: { children: ReactNode }) {
               log(d, "Changed Status", e.name, before.status, patch.status);
           },
           { toast: "Employee updated" },
+        ),
+
+
+      recordGateEntry: (payload) =>
+        update(
+          (d) => {
+            const ev: GateEvent = {
+              id: uid("GT"),
+              gate: payload.gate,
+              vehicleNo: payload.vehicleNo.toUpperCase(),
+              driver: payload.driver,
+              transporter: payload.transporter,
+              purpose: payload.purpose,
+              shipmentId: payload.shipmentId,
+              entryAt: new Date().toISOString(),
+              status: "Inside",
+              guard: d.employees.find((e) => e.id === d.currentUserId)?.name ?? "Gate Desk",
+            };
+            d.gateEvents.unshift(ev);
+            log(d, "Gate Entry Recorded", `${ev.vehicleNo} · ${ev.gate}`, undefined, ev.purpose);
+            const sh = d.inbound.find(
+              (x) => x.id === payload.shipmentId || x.vehicleNo.toUpperCase() === ev.vehicleNo,
+            );
+            if (sh && sh.status === "Scheduled") {
+              sh.status = "Arrived";
+              sh.arrivedAt = ev.entryAt;
+              ev.shipmentId = sh.id;
+              log(d, "Inbound Arrived", sh.id, "Scheduled", "Arrived");
+              notify(d, "info", `${sh.id} arrived at ${ev.gate}`, `${sh.supplier} · vehicle ${ev.vehicleNo}.`);
+            }
+          },
+          { toast: `${payload.vehicleNo.toUpperCase()} logged in at ${payload.gate}` },
+        ),
+
+      recordGateExit: (id) =>
+        update(
+          (d) => {
+            const ev = d.gateEvents.find((g) => g.id === id);
+            if (!ev || ev.status === "Exited") return;
+            ev.status = "Exited";
+            ev.exitAt = new Date().toISOString();
+            log(d, "Gate Exit Recorded", `${ev.vehicleNo} · ${ev.gate}`, "Inside", "Exited");
+          },
+          { toast: "Vehicle exit recorded" },
+        ),
+
+      advanceInbound: (id) =>
+        update((d) => {
+          const sh = d.inbound.find((x) => x.id === id);
+          if (!sh) return;
+          const order: InboundShipment["status"][] = ["Scheduled", "Arrived", "At Dock", "Unloading", "Verification"];
+          const i = order.indexOf(sh.status);
+          if (i < 0 || i >= order.length - 1) return;
+          const prev = sh.status;
+          sh.status = order[i + 1]!;
+          if (sh.status === "Arrived") sh.arrivedAt = new Date().toISOString();
+          if (sh.status === "Unloading") sh.lines.forEach((l) => (l.receivedQty = l.receivedQty || l.expectedQty));
+          log(d, "Inbound Step Advanced", sh.id, prev, sh.status);
+          toast.success(`${sh.id} moved to ${sh.status}`);
+        }),
+
+      setInboundReceived: (id, sku, received, damaged) =>
+        update((d) => {
+          const sh = d.inbound.find((x) => x.id === id);
+          const line = sh?.lines.find((l) => l.sku === sku);
+          if (!line) return;
+          line.receivedQty = Math.max(0, received);
+          line.damagedQty = Math.max(0, damaged);
+        }),
+
+      completeInbound: (id) =>
+        update(
+          (d) => {
+            const sh = d.inbound.find((x) => x.id === id);
+            if (!sh || sh.status === "Received") return;
+            let mismatch = false;
+            sh.lines.forEach((l) => {
+              const good = Math.max(0, l.receivedQty - l.damagedQty);
+              const p = d.products.find((x) => x.sku === l.sku);
+              if (p) {
+                p.available += good;
+                p.damaged += l.damagedQty;
+              }
+              if (good > 0) txn(d, l.sku, "Received", good, `${sh.id} · ${sh.po}`);
+              if (l.damagedQty > 0) txn(d, l.sku, "Damaged", l.damagedQty, `${sh.id} · ${sh.po}`);
+              if (l.receivedQty !== l.expectedQty || l.damagedQty > 0) mismatch = true;
+            });
+            sh.receivedAt = new Date().toISOString();
+            sh.status = mismatch ? "Discrepancy" : "Received";
+            log(d, "Inbound Received", sh.id, "Verification", sh.status);
+
+            if (mismatch) {
+              const detail = sh.lines
+                .filter((l) => l.receivedQty !== l.expectedQty || l.damagedQty > 0)
+                .map((l) => `${l.sku}: expected ${l.expectedQty}, received ${l.receivedQty}, damaged ${l.damagedQty}`)
+                .join("; ");
+              d.exceptions.unshift({
+                id: uid("EXC"),
+                type: "Stock Mismatch",
+                sku: sh.lines[0]?.sku,
+                problem: `Receiving mismatch on ${sh.id} (${sh.po}) from ${sh.supplier}. ${detail}.`,
+                impact: "Inventory position and supplier invoice will not reconcile.",
+                recommendation: "Raise a supplier claim, quarantine damaged units and re-count the pallet.",
+                owner: "Sunita Rao",
+                slaMin: 120,
+                severity: "High",
+                status: "Open",
+                createdAt: new Date().toISOString(),
+              });
+              notify(d, "critical", `Receiving mismatch on ${sh.id}`, detail);
+            } else {
+              notify(d, "info", `${sh.id} received`, `${sh.supplier} stock added to inventory.`);
+            }
+          },
+          { toast: `Receiving completed for ${id}` },
         ),
 
       markNotification: (id) =>

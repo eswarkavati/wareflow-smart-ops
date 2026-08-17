@@ -8,7 +8,8 @@ export type Role =
   | "Dispatcher"
   | "Picker"
   | "Packer"
-  | "QC Operator";
+  | "QC Operator"
+  | "Gate Manager";
 
 export type Priority = "CRITICAL" | "HIGH" | "NORMAL" | "LOW";
 
@@ -169,6 +170,60 @@ export interface WfState {
   replenishments: Replenishment[];
   audit: AuditLog[];
   notifications: Notification[];
+  inbound: InboundShipment[];
+  gateEvents: GateEvent[];
   currentUserId: string | null;
   updatedAt: string;
+}
+
+/* ---------------- Gate entry & inbound (Shipping · Import Goods) ---------------- */
+
+export type GateId = "NORTH GATE" | "SOUTH GATE";
+
+export type InboundStatus =
+  | "Scheduled"
+  | "Arrived"
+  | "At Dock"
+  | "Unloading"
+  | "Verification"
+  | "Received"
+  | "Discrepancy";
+
+export interface InboundLine {
+  sku: string;
+  name: string;
+  expectedQty: number;
+  receivedQty: number;
+  damagedQty: number;
+}
+
+export interface InboundShipment {
+  id: string;
+  po: string;
+  supplier: string;
+  vehicleNo: string;
+  driver: string;
+  driverPhone: string;
+  gate: GateId;
+  dock: string;
+  expectedAt: string;
+  arrivedAt?: string | undefined;
+  receivedAt?: string | undefined;
+  status: InboundStatus;
+  lines: InboundLine[];
+  notes?: string | undefined;
+}
+
+export interface GateEvent {
+  id: string;
+  gate: GateId;
+  vehicleNo: string;
+  driver: string;
+  transporter: string;
+  purpose: "Inbound" | "Outbound" | "Visitor" | "Service";
+  shipmentId?: string | undefined;
+  entryAt: string;
+  exitAt?: string | undefined;
+  status: "Inside" | "Exited";
+  guard: string;
 }

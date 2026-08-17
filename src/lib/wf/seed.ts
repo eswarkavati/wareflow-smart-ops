@@ -9,7 +9,168 @@ import type {
   AuditLog,
   Notification,
 } from "./types";
+import type { GateEvent, InboundShipment } from "./types";
 import { scoreOrder } from "./engine";
+
+function buildInbound(now: number, products: Product[]): InboundShipment[] {
+  const iso = (m: number) => new Date(now + m * 60000).toISOString();
+  const line = (sku: string, expectedQty: number, receivedQty = 0, damagedQty = 0) => {
+    const p = products.find((x) => x.sku === sku);
+    return { sku, name: p?.name ?? sku, expectedQty, receivedQty, damagedQty };
+  };
+  return [
+    {
+      id: "INB-5001",
+      po: "PO-88231",
+      supplier: "Nexa Distributors",
+      vehicleNo: "KA-01-AB-4412",
+      driver: "Ravi Shetty",
+      driverPhone: "+91 98450 11223",
+      gate: "NORTH GATE",
+      dock: "DOCK-IN-1",
+      expectedAt: iso(-45),
+      arrivedAt: iso(-38),
+      status: "At Dock",
+      lines: [line("WH-HEAD-001", 120), line("WH-CHG-004", 200), line("WH-CBLE-013", 400)],
+      notes: "Priority inbound — replenishes critical headphone stock.",
+    },
+    {
+      id: "INB-5002",
+      po: "PO-88245",
+      supplier: "Orbit Supply Co",
+      vehicleNo: "MH-12-XY-7781",
+      driver: "Suresh Pawar",
+      driverPhone: "+91 99870 55410",
+      gate: "SOUTH GATE",
+      dock: "DOCK-IN-2",
+      expectedAt: iso(30),
+      status: "Scheduled",
+      lines: [line("WH-MOUS-012", 150), line("WH-KEYB-003", 80)],
+    },
+    {
+      id: "INB-5003",
+      po: "PO-88250",
+      supplier: "Aster Traders",
+      vehicleNo: "TN-09-KL-2298",
+      driver: "Ilango Murugan",
+      driverPhone: "+91 90031 77812",
+      gate: "NORTH GATE",
+      dock: "DOCK-IN-3",
+      expectedAt: iso(120),
+      status: "Scheduled",
+      lines: [line("WH-BOTL-029", 300), line("WH-YOGA-027", 120), line("WH-TSRT-022", 500)],
+    },
+    {
+      id: "INB-5004",
+      po: "PO-88198",
+      supplier: "Vertex Industries",
+      vehicleNo: "KA-05-MN-6633",
+      driver: "Prakash Naik",
+      driverPhone: "+91 97400 33221",
+      gate: "SOUTH GATE",
+      dock: "DOCK-IN-1",
+      expectedAt: iso(-260),
+      arrivedAt: iso(-250),
+      receivedAt: iso(-205),
+      status: "Received",
+      lines: [line("WH-LAMP-016", 90, 90), line("WH-KETL-018", 60, 60)],
+    },
+    {
+      id: "INB-5005",
+      po: "PO-88203",
+      supplier: "Nexa Distributors",
+      vehicleNo: "AP-16-CD-9012",
+      driver: "Vamsi Reddy",
+      driverPhone: "+91 91000 22114",
+      gate: "NORTH GATE",
+      dock: "DOCK-IN-2",
+      expectedAt: iso(-320),
+      arrivedAt: iso(-310),
+      receivedAt: iso(-268),
+      status: "Discrepancy",
+      lines: [line("WH-SPKR-007", 100, 94, 3), line("WH-PWRB-011", 150, 150)],
+      notes: "Short receipt of 6 units logged against supplier claim.",
+    },
+  ];
+}
+
+function buildGateEvents(now: number): GateEvent[] {
+  const iso = (m: number) => new Date(now + m * 60000).toISOString();
+  return [
+    {
+      id: "GT-9001",
+      gate: "NORTH GATE",
+      vehicleNo: "KA-01-AB-4412",
+      driver: "Ravi Shetty",
+      transporter: "Nexa Logistics",
+      purpose: "Inbound",
+      shipmentId: "INB-5001",
+      entryAt: iso(-38),
+      status: "Inside",
+      guard: "Balwinder Singh",
+    },
+    {
+      id: "GT-9002",
+      gate: "SOUTH GATE",
+      vehicleNo: "KA-53-TR-1180",
+      driver: "Anand Kumar",
+      transporter: "Delhivery",
+      purpose: "Outbound",
+      entryAt: iso(-22),
+      status: "Inside",
+      guard: "Meera Krishnan",
+    },
+    {
+      id: "GT-9003",
+      gate: "NORTH GATE",
+      vehicleNo: "KA-41-BD-7712",
+      driver: "Farhan Ali",
+      transporter: "Blue Dart",
+      purpose: "Outbound",
+      entryAt: iso(-140),
+      exitAt: iso(-96),
+      status: "Exited",
+      guard: "Balwinder Singh",
+    },
+    {
+      id: "GT-9004",
+      gate: "SOUTH GATE",
+      vehicleNo: "KA-05-MN-6633",
+      driver: "Prakash Naik",
+      transporter: "Vertex Transport",
+      purpose: "Inbound",
+      shipmentId: "INB-5004",
+      entryAt: iso(-250),
+      exitAt: iso(-190),
+      status: "Exited",
+      guard: "Meera Krishnan",
+    },
+    {
+      id: "GT-9005",
+      gate: "NORTH GATE",
+      vehicleNo: "KA-02-SV-3390",
+      driver: "Mahesh Gowda",
+      transporter: "Facilities",
+      purpose: "Service",
+      entryAt: iso(-64),
+      status: "Inside",
+      guard: "Balwinder Singh",
+    },
+    {
+      id: "GT-9006",
+      gate: "SOUTH GATE",
+      vehicleNo: "AP-16-CD-9012",
+      driver: "Vamsi Reddy",
+      transporter: "Nexa Logistics",
+      purpose: "Inbound",
+      shipmentId: "INB-5005",
+      entryAt: iso(-310),
+      exitAt: iso(-255),
+      status: "Exited",
+      guard: "Meera Krishnan",
+    },
+  ];
+}
 
 // Deterministic pseudo-random so seeded data is stable and realistic.
 let s = 20250817;
@@ -127,6 +288,8 @@ const EMPLOYEES: Employee[] = [
   ["Ajay Thomas", "QC Operator", "QC-1"],
   ["Fatima Rizvi", "QC Operator", "QC-2"],
   ["Gaurav Mishra", "Picker", "D-04"],
+  ["Balwinder Singh", "Gate Manager", "NORTH GATE"],
+  ["Meera Krishnan", "Gate Manager", "SOUTH GATE"],
 ].map(([name, role, zone], i) => ({
   id: `EMP-${1001 + i}`,
   name: name!,
@@ -145,6 +308,7 @@ export const DEMO_ACCOUNTS = [
   { email: "manager@wareflow.demo", id: "EMP-1002" },
   { email: "inventory@wareflow.demo", id: "EMP-1003" },
   { email: "picker@wareflow.demo", id: "EMP-1008" },
+  { email: "balwinder@wareflow.demo", id: "EMP-1018" },
 ];
 
 function buildProducts(): Product[] {
@@ -532,6 +696,8 @@ export function buildSeed(): WfState {
     replenishments: [],
     audit,
     notifications,
+    inbound: buildInbound(now, products),
+    gateEvents: buildGateEvents(now),
     currentUserId: null,
     updatedAt: new Date(now).toISOString(),
   };

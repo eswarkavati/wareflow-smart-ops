@@ -16,6 +16,7 @@ import { Route as AuditRouteImport } from './routes/audit'
 import { Route as DispatchRouteImport } from './routes/dispatch'
 import { Route as EmployeesRouteImport } from './routes/employees'
 import { Route as ExceptionsRouteImport } from './routes/exceptions'
+import { Route as GateEntryRouteImport } from './routes/gate-entry'
 import { Route as InventoryRouteImport } from './routes/inventory'
 import { Route as OrdersRouteImport } from './routes/orders'
 import { Route as OverviewRouteImport } from './routes/overview'
@@ -23,6 +24,7 @@ import { Route as PackingRouteImport } from './routes/packing'
 import { Route as PickingRouteImport } from './routes/picking'
 import { Route as ReplenishmentRouteImport } from './routes/replenishment'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as ShippingRouteImport } from './routes/shipping'
 import { Route as UsersRouteImport } from './routes/users'
 
 const IndexRoute = IndexRouteImport.update({
@@ -60,6 +62,11 @@ const ExceptionsRoute = ExceptionsRouteImport.update({
   path: '/exceptions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GateEntryRoute = GateEntryRouteImport.update({
+  id: '/gate-entry',
+  path: '/gate-entry',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InventoryRoute = InventoryRouteImport.update({
   id: '/inventory',
   path: '/inventory',
@@ -95,6 +102,11 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ShippingRoute = ShippingRouteImport.update({
+  id: '/shipping',
+  path: '/shipping',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UsersRoute = UsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -109,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/dispatch': typeof DispatchRoute
   '/employees': typeof EmployeesRoute
   '/exceptions': typeof ExceptionsRoute
+  '/gate-entry': typeof GateEntryRoute
   '/inventory': typeof InventoryRoute
   '/orders': typeof OrdersRoute
   '/overview': typeof OverviewRoute
@@ -116,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/picking': typeof PickingRoute
   '/replenishment': typeof ReplenishmentRoute
   '/settings': typeof SettingsRoute
+  '/shipping': typeof ShippingRoute
   '/users': typeof UsersRoute
 }
 export interface FileRoutesByTo {
@@ -126,6 +140,7 @@ export interface FileRoutesByTo {
   '/dispatch': typeof DispatchRoute
   '/employees': typeof EmployeesRoute
   '/exceptions': typeof ExceptionsRoute
+  '/gate-entry': typeof GateEntryRoute
   '/inventory': typeof InventoryRoute
   '/orders': typeof OrdersRoute
   '/overview': typeof OverviewRoute
@@ -133,6 +148,7 @@ export interface FileRoutesByTo {
   '/picking': typeof PickingRoute
   '/replenishment': typeof ReplenishmentRoute
   '/settings': typeof SettingsRoute
+  '/shipping': typeof ShippingRoute
   '/users': typeof UsersRoute
 }
 export interface FileRoutesById {
@@ -144,6 +160,7 @@ export interface FileRoutesById {
   '/dispatch': typeof DispatchRoute
   '/employees': typeof EmployeesRoute
   '/exceptions': typeof ExceptionsRoute
+  '/gate-entry': typeof GateEntryRoute
   '/inventory': typeof InventoryRoute
   '/orders': typeof OrdersRoute
   '/overview': typeof OverviewRoute
@@ -151,6 +168,7 @@ export interface FileRoutesById {
   '/picking': typeof PickingRoute
   '/replenishment': typeof ReplenishmentRoute
   '/settings': typeof SettingsRoute
+  '/shipping': typeof ShippingRoute
   '/users': typeof UsersRoute
 }
 export interface FileRouteTypes {
@@ -163,6 +181,7 @@ export interface FileRouteTypes {
     | '/dispatch'
     | '/employees'
     | '/exceptions'
+    | '/gate-entry'
     | '/inventory'
     | '/orders'
     | '/overview'
@@ -170,6 +189,7 @@ export interface FileRouteTypes {
     | '/picking'
     | '/replenishment'
     | '/settings'
+    | '/shipping'
     | '/users'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -180,6 +200,7 @@ export interface FileRouteTypes {
     | '/dispatch'
     | '/employees'
     | '/exceptions'
+    | '/gate-entry'
     | '/inventory'
     | '/orders'
     | '/overview'
@@ -187,6 +208,7 @@ export interface FileRouteTypes {
     | '/picking'
     | '/replenishment'
     | '/settings'
+    | '/shipping'
     | '/users'
   id:
     | '__root__'
@@ -197,6 +219,7 @@ export interface FileRouteTypes {
     | '/dispatch'
     | '/employees'
     | '/exceptions'
+    | '/gate-entry'
     | '/inventory'
     | '/orders'
     | '/overview'
@@ -204,6 +227,7 @@ export interface FileRouteTypes {
     | '/picking'
     | '/replenishment'
     | '/settings'
+    | '/shipping'
     | '/users'
   fileRoutesById: FileRoutesById
 }
@@ -215,6 +239,7 @@ export interface RootRouteChildren {
   DispatchRoute: typeof DispatchRoute
   EmployeesRoute: typeof EmployeesRoute
   ExceptionsRoute: typeof ExceptionsRoute
+  GateEntryRoute: typeof GateEntryRoute
   InventoryRoute: typeof InventoryRoute
   OrdersRoute: typeof OrdersRoute
   OverviewRoute: typeof OverviewRoute
@@ -222,6 +247,7 @@ export interface RootRouteChildren {
   PickingRoute: typeof PickingRoute
   ReplenishmentRoute: typeof ReplenishmentRoute
   SettingsRoute: typeof SettingsRoute
+  ShippingRoute: typeof ShippingRoute
   UsersRoute: typeof UsersRoute
 }
 
@@ -276,6 +302,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ExceptionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gate-entry': {
+      id: '/gate-entry'
+      path: '/gate-entry'
+      fullPath: '/gate-entry'
+      preLoaderRoute: typeof GateEntryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/inventory': {
       id: '/inventory'
       path: '/inventory'
@@ -325,6 +358,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/shipping': {
+      id: '/shipping'
+      path: '/shipping'
+      fullPath: '/shipping'
+      preLoaderRoute: typeof ShippingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/users': {
       id: '/users'
       path: '/users'
@@ -343,6 +383,7 @@ const rootRouteChildren: RootRouteChildren = {
   DispatchRoute: DispatchRoute,
   EmployeesRoute: EmployeesRoute,
   ExceptionsRoute: ExceptionsRoute,
+  GateEntryRoute: GateEntryRoute,
   InventoryRoute: InventoryRoute,
   OrdersRoute: OrdersRoute,
   OverviewRoute: OverviewRoute,
@@ -350,6 +391,7 @@ const rootRouteChildren: RootRouteChildren = {
   PickingRoute: PickingRoute,
   ReplenishmentRoute: ReplenishmentRoute,
   SettingsRoute: SettingsRoute,
+  ShippingRoute: ShippingRoute,
   UsersRoute: UsersRoute,
 }
 export const routeTree = rootRouteImport
