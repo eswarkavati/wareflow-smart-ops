@@ -34,7 +34,7 @@ function Audit() {
 
   return (
     <>
-      <PageHeader title="Audit Logs" subtitle={`${state.audit.length} recorded actions`} />
+      <PageHeader eyebrow="Management" title="Audit Logs" subtitle={`${state.audit.length} recorded actions`} />
       <Panel bodyClassName="p-0">
         <div className="border-b border-border p-3">
           <Input

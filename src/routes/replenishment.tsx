@@ -62,6 +62,7 @@ function Replenishment() {
   return (
     <>
       <PageHeader
+        eyebrow="Operations"
         title="Replenishment Planning"
         subtitle="Demand-driven reorder recommendations across suppliers"
       />

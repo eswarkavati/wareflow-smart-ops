@@ -7,25 +7,31 @@ import {
   BarChart3,
   Bell,
   Boxes,
+  ChevronDown,
   ClipboardList,
   Cog,
   DoorOpen,
   LayoutGrid,
   LogOut,
   MapPin,
+  Menu,
+  Moon,
   PackageCheck,
   RefreshCw,
   ScrollText,
   Search,
   ShieldCheck,
   Split,
+  Sun,
   Truck,
   Users,
+  Warehouse,
 } from "lucide-react";
 import { useWf } from "@/lib/wf/store";
 import { canAccess, fmtAgo, type NavKey } from "@/lib/wf/engine";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import {
   CommandDialog,
   CommandEmpty,
@@ -34,13 +40,15 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { StatusBadge } from "@/components/wf/ui";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
 
+
+const GROUP_ORDER = ["Command", "Operations", "Intelligence", "Management", "System"] as const;
+
 const NAV: { key: NavKey; label: string; to: string; icon: typeof LayoutGrid; group: string }[] = [
-  { key: "overview", label: "Overview", to: "/overview", icon: LayoutGrid, group: "Operations" },
+  { key: "overview", label: "Overview", to: "/overview", icon: LayoutGrid, group: "Command" },
   { key: "orders", label: "Orders", to: "/orders", icon: ClipboardList, group: "Operations" },
   { key: "inventory", label: "Inventory", to: "/inventory", icon: Boxes, group: "Operations" },
   { key: "allocation", label: "Allocation", to: "/allocation", icon: Split, group: "Operations" },
@@ -50,12 +58,26 @@ const NAV: { key: NavKey; label: string; to: string; icon: typeof LayoutGrid; gr
   { key: "gate-entry", label: "Gate Entry", to: "/gate-entry", icon: DoorOpen, group: "Operations" },
   { key: "exceptions", label: "Exceptions", to: "/exceptions", icon: AlertTriangle, group: "Operations" },
   { key: "replenishment", label: "Replenishment", to: "/replenishment", icon: RefreshCw, group: "Operations" },
-  { key: "analytics", label: "Analytics", to: "/analytics", icon: BarChart3, group: "Operations" },
+  { key: "analytics", label: "Analytics", to: "/analytics", icon: BarChart3, group: "Intelligence" },
   { key: "employees", label: "Employees", to: "/employees", icon: Users, group: "Management" },
   { key: "users", label: "Users & Roles", to: "/users", icon: ShieldCheck, group: "Management" },
-  { key: "audit", label: "Audit Logs", to: "/audit", icon: ScrollText, group: "System" },
+  { key: "audit", label: "Audit Logs", to: "/audit", icon: ScrollText, group: "Management" },
   { key: "settings", label: "Settings", to: "/settings", icon: Cog, group: "System" },
 ];
+
+function useTheme() {
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  useEffect(() => {
+    const saved = (localStorage.getItem("wf-theme") as "light" | "dark" | null) ?? "light";
+    setTheme(saved);
+  }, []);
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    localStorage.setItem("wf-theme", theme);
+  }, [theme]);
+  return { theme, setTheme };
+}
+
 
 function Clock() {
   const [now, setNow] = useState(() => new Date());
@@ -207,11 +229,81 @@ function Notifications() {
   );
 }
 
+type NavItem = (typeof NAV)[number];
+
+function SidebarNav({
+  groups,
+  pathname,
+  openExceptions,
+  onNavigate,
+}: {
+  groups: { group: string; items: NavItem[] }[];
+  pathname: string;
+  openExceptions: number;
+  onNavigate?: () => void;
+}) {
+  return (
+    <nav className="flex-1 overflow-y-auto px-3 py-4">
+      {groups.map((g) => (
+        <div key={g.group} className="mb-4">
+          <p className="px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground/70">
+            {g.group}
+          </p>
+          {g.items.map((item) => {
+            const active = pathname === item.to;
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.key}
+                to={item.to}
+                onClick={onNavigate}
+                className={cn(
+                  "relative mb-0.5 flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] transition-colors",
+                  active
+                    ? "bg-accent font-semibold text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+              >
+                {active ? (
+                  <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-primary" />
+                ) : null}
+                <Icon className={cn("h-4 w-4 shrink-0", active && "text-primary")} />
+                {item.label}
+                {item.key === "exceptions" && openExceptions > 0 ? (
+                  <span className="ml-auto rounded-full bg-accent px-1.5 text-[10px] font-semibold text-primary">
+                    {openExceptions}
+                  </span>
+                ) : null}
+              </Link>
+            );
+          })}
+        </div>
+      ))}
+    </nav>
+  );
+}
+
+function Brand() {
+  return (
+    <div className="flex items-center gap-2.5 border-b border-sidebar-border px-4 py-4">
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+        <Warehouse className="h-4 w-4" />
+      </div>
+      <div className="leading-tight">
+        <p className="text-sm font-bold tracking-tight text-foreground">WAREFLOW</p>
+        <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">Intelligence</p>
+      </div>
+    </div>
+  );
+}
+
 export function AppShell({ navKey, children }: { navKey: NavKey; children: ReactNode }) {
   const { state, user, logout, lastSyncAt, nextSyncAt, syncing, refreshNow, liveUpdates, setLiveUpdates } = useWf();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [tick, setTick] = useState(0);
+  const [mobileNav, setMobileNav] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const t = setInterval(() => setTick((v) => v + 1), 10000);
@@ -224,79 +316,41 @@ export function AppShell({ navKey, children }: { navKey: NavKey; children: React
 
   const groups = useMemo(() => {
     const allowed = NAV.filter((n) => canAccess(user?.role, n.key));
-    return ["Operations", "Management", "System"]
-      .map((g) => ({ group: g, items: allowed.filter((n) => n.group === g) }))
-      .filter((g) => g.items.length > 0);
+    return GROUP_ORDER.map((g) => ({ group: g as string, items: allowed.filter((n) => n.group === g) })).filter(
+      (g) => g.items.length > 0,
+    );
   }, [user?.role]);
 
   if (!user) return null;
 
   const denied = !canAccess(user.role, navKey);
   const openExceptions = state.exceptions.filter((e) => e.status !== "Resolved").length;
+  const current = NAV.find((n) => n.key === navKey)?.label ?? "Overview";
+  const initials = user.name
+    .split(" ")
+    .map((p) => p[0])
+    .join("");
 
   return (
     <div className="flex min-h-screen bg-background">
-      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col bg-sidebar text-sidebar-foreground md:flex">
-        <div className="flex items-center gap-2 border-b border-sidebar-border px-4 py-3.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded bg-sidebar-primary text-sidebar-primary-foreground">
-            <Boxes className="h-4 w-4" />
-          </div>
-          <div className="leading-tight">
-            <p className="text-sm font-semibold tracking-wide text-white">WAREFLOW</p>
-            <p className="text-[10px] text-sidebar-foreground/60">Intelligent Warehouse Ops</p>
-          </div>
-        </div>
-        <nav className="flex-1 overflow-y-auto px-2 py-3">
-          {groups.map((g) => (
-            <div key={g.group} className="mb-3">
-              <p className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-widest text-sidebar-foreground/40">
-                {g.group}
-              </p>
-              {g.items.map((item) => {
-                const active = pathname === item.to;
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.key}
-                    to={item.to}
-                    className={cn(
-                      "mb-0.5 flex items-center gap-2.5 rounded-md px-2 py-1.5 text-[13px] transition-colors",
-                      active
-                        ? "bg-sidebar-accent font-medium text-sidebar-accent-foreground"
-                        : "text-sidebar-foreground/80 hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
-                    )}
-                  >
-                    <Icon className="h-4 w-4 shrink-0" />
-                    {item.label}
-                    {item.key === "exceptions" && openExceptions > 0 ? (
-                      <span className="ml-auto rounded bg-destructive/80 px-1.5 text-[10px] font-semibold text-white">
-                        {openExceptions}
-                      </span>
-                    ) : null}
-                  </Link>
-                );
-              })}
-            </div>
-          ))}
-        </nav>
+      <aside className="sticky top-0 hidden h-screen w-[248px] shrink-0 flex-col border-r border-sidebar-border bg-sidebar md:flex">
+        <Brand />
+        <SidebarNav groups={groups} pathname={pathname} openExceptions={openExceptions} />
         <div className="border-t border-sidebar-border p-3">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sidebar-accent text-xs font-semibold text-white">
-              {user.name
-                .split(" ")
-                .map((p) => p[0])
-                .join("")}
+          <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-2 py-1.5">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-[11px] font-semibold text-primary">
+              {initials}
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-medium text-white">{user.name}</p>
-              <p className="truncate text-[10px] text-sidebar-foreground/60">{user.role}</p>
+            <div className="min-w-0 flex-1 leading-tight">
+              <p className="truncate text-xs font-medium text-foreground">{user.name}</p>
+              <p className="truncate text-[10px] text-muted-foreground">{user.role}</p>
             </div>
             <button
               onClick={() => {
                 logout();
                 void navigate({ to: "/", replace: true });
               }}
-              className="rounded p-1.5 text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-white"
+              className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-primary"
               aria-label="Log out"
             >
               <LogOut className="h-4 w-4" />
@@ -305,62 +359,130 @@ export function AppShell({ navKey, children }: { navKey: NavKey; children: React
         </div>
       </aside>
 
+      <Sheet open={mobileNav} onOpenChange={setMobileNav}>
+        <SheetContent side="left" className="w-[260px] bg-sidebar p-0">
+          <Brand />
+          <SidebarNav
+            groups={groups}
+            pathname={pathname}
+            openExceptions={openExceptions}
+            onNavigate={() => setMobileNav(false)}
+          />
+        </SheetContent>
+      </Sheet>
+
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex flex-wrap items-center gap-3 border-b border-border bg-card/95 px-4 py-2.5 backdrop-blur">
-          <div className="flex items-center gap-2 rounded-md border border-border bg-surface px-2.5 py-1">
-            <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-xs font-medium">Bangalore Hub</span>
-          </div>
-          <StatusBadge value="Operational" tone="green" />
-          <Clock />
-          <div className="ml-auto flex items-center gap-2">
-            <GlobalSearch />
-            <Notifications />
-          </div>
-          <div className="flex items-center gap-2 rounded-md border border-border bg-card px-2 py-1">
-            <Switch
-              id="live-updates"
-              checked={liveUpdates}
-              onCheckedChange={setLiveUpdates}
-              aria-label="Toggle live updates"
-            />
-            <label htmlFor="live-updates" className="cursor-pointer text-[11px] font-medium text-muted-foreground">
-              Live Updates {liveUpdates ? "ON" : "OFF"}
-            </label>
-          </div>
+        <header className="sticky top-0 z-20 flex flex-wrap items-center gap-2.5 border-b border-border bg-card/95 px-4 py-2.5 backdrop-blur">
           <button
-            onClick={refreshNow}
-            title="Automatic sync every 30 minutes — click to sync now"
-            className="tabular flex items-center gap-1.5 rounded-md border border-border bg-card px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+            className="flex h-8 w-8 items-center justify-center rounded-md border border-border text-muted-foreground md:hidden"
+            onClick={() => setMobileNav(true)}
+            aria-label="Open navigation"
           >
-            <RefreshCw className={cn("h-3 w-3", syncing && "animate-spin text-primary")} />
-            {syncing ? "Syncing…" : `Last updated ${fmtAgo(lastSyncAt)}`}
-            {!syncing && liveUpdates ? (
-              <span className="hidden text-muted-foreground/70 lg:inline">
-                · next in {Math.max(0, Math.round((new Date(nextSyncAt).getTime() - Date.now()) / 60000))}m
-              </span>
-            ) : null}
-            <span className="hidden">{tick}</span>
+            <Menu className="h-4 w-4" />
           </button>
+          <div className="flex items-center gap-1.5 text-xs">
+            <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-muted-foreground">Bangalore Hub</span>
+            <span className="text-muted-foreground/50">/</span>
+            <span className="font-semibold text-foreground">{current}</span>
+          </div>
+          <span className="hidden items-center gap-1.5 rounded-full border border-border bg-surface px-2.5 py-1 text-[11px] font-medium text-muted-foreground sm:inline-flex">
+            <span className="h-1.5 w-1.5 rounded-full bg-success" />
+            Live Operations
+          </span>
+          <Clock />
+
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            <GlobalSearch />
+            <button
+              onClick={refreshNow}
+              title="Automatic sync every 30 minutes — click to sync now"
+              className="tabular flex items-center gap-1.5 rounded-md border border-border bg-card px-2 py-1.5 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <RefreshCw className={cn("h-3 w-3", syncing && "animate-spin text-primary")} />
+              {syncing ? "Syncing…" : `Last updated ${fmtAgo(lastSyncAt)}`}
+              {!syncing && liveUpdates ? (
+                <span className="hidden text-muted-foreground/70 xl:inline">
+                  · next in {Math.max(0, Math.round((new Date(nextSyncAt).getTime() - Date.now()) / 60000))}m
+                </span>
+              ) : null}
+              <span className="hidden">{tick}</span>
+            </button>
+            <div className="flex items-center gap-2 rounded-md border border-border bg-card px-2 py-1">
+              <Switch
+                id="live-updates"
+                checked={liveUpdates}
+                onCheckedChange={setLiveUpdates}
+                aria-label="Toggle live updates"
+              />
+              <label htmlFor="live-updates" className="cursor-pointer text-[11px] font-medium text-muted-foreground">
+                Live Updates
+              </label>
+            </div>
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card text-muted-foreground transition-colors hover:text-foreground"
+              aria-label="Toggle appearance"
+            >
+              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            </button>
+            <Notifications />
+            <Popover>
+              <PopoverTrigger asChild>
+                <button className="flex items-center gap-2 rounded-md border border-border bg-card px-1.5 py-1 text-left transition-colors hover:bg-muted">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent text-[10px] font-semibold text-primary">
+                    {initials}
+                  </span>
+                  <span className="hidden leading-tight lg:block">
+                    <span className="block text-[11px] font-medium text-foreground">{user.name}</span>
+                    <span className="block text-[10px] text-muted-foreground">{user.role}</span>
+                  </span>
+                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-56 p-1.5">
+                <div className="border-b border-border px-2 pb-2 pt-1">
+                  <p className="text-sm font-medium text-foreground">{user.name}</p>
+                  <p className="text-xs text-muted-foreground">{user.role}</p>
+                </div>
+                <Link
+                  to="/settings"
+                  className="mt-1 flex items-center gap-2 rounded-md px-2 py-1.5 text-sm text-foreground transition-colors hover:bg-muted"
+                >
+                  <Cog className="h-4 w-4 text-muted-foreground" /> Settings
+                </Link>
+                <button
+                  onClick={() => {
+                    logout();
+                    void navigate({ to: "/", replace: true });
+                  }}
+                  className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm text-primary transition-colors hover:bg-accent"
+                >
+                  <LogOut className="h-4 w-4" /> Log out
+                </button>
+              </PopoverContent>
+            </Popover>
+          </div>
         </header>
 
-
         <main className="min-w-0 flex-1 p-4 lg:p-6">
-          {denied ? (
-            <div className="panel mx-auto mt-16 max-w-md p-8 text-center">
-              <BadgeCheck className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
-              <h2 className="text-base font-semibold">Restricted section</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Your role ({user.role}) does not have access to this area. Contact an administrator if you
-                need it.
-              </p>
-              <Button className="mt-4" onClick={() => { void navigate({ to: "/overview" as string }); }}>
-                Back to Control Tower
-              </Button>
-            </div>
-          ) : (
-            children
-          )}
+          <div className="mx-auto w-full max-w-[1560px]">
+            {denied ? (
+              <div className="panel mx-auto mt-16 max-w-md p-8 text-center">
+                <BadgeCheck className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
+                <h2 className="text-base font-semibold">Restricted section</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Your role ({user.role}) does not have access to this area. Contact an administrator if you
+                  need it.
+                </p>
+                <Button className="mt-4" onClick={() => { void navigate({ to: "/overview" as string }); }}>
+                  Back to Control Tower
+                </Button>
+              </div>
+            ) : (
+              children
+            )}
+          </div>
         </main>
       </div>
     </div>

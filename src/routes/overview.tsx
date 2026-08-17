@@ -59,8 +59,10 @@ function Overview() {
   return (
     <>
       <PageHeader
+        eyebrow="Command"
         title="Warehouse Control Tower"
-        subtitle="Bangalore Hub — live operational picture across the fulfilment chain"
+        subtitle="Bangalore Hub · Live warehouse operations"
+
         action={
           <Button asChild size="sm" variant="outline">
             <Link to="/allocation">Open Allocation Center</Link>

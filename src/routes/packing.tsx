@@ -48,6 +48,7 @@ function Packing() {
   return (
     <>
       <PageHeader
+        eyebrow="Operations"
         title="Packing & Quality Check"
         subtitle={`${packQueue.length} orders at the packing station · ${qcQueue.length} awaiting QC`}
       />

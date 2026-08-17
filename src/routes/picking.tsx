@@ -59,6 +59,7 @@ function Picking() {
   return (
     <>
       <PageHeader
+        eyebrow="Operations"
         title="Picking Operations"
         subtitle={`${state.pickTasks.filter((t) => t.status !== "Completed").length} open tasks in the pick queue`}
       />

@@ -51,7 +51,7 @@ function Employees() {
 
   return (
     <>
-      <PageHeader title="Workforce Management" subtitle="Shift coverage, zone assignment and productivity" />
+      <PageHeader eyebrow="Management" title="Workforce Management" subtitle="Shift coverage, zone assignment and productivity" />
 
       <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
         <Kpi label="Total staff" value={state.employees.length} />

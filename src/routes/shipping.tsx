@@ -32,6 +32,7 @@ function Shipping() {
   return (
     <>
       <PageHeader
+        eyebrow="Operations"
         title="Shipping"
         subtitle="Inbound goods receiving and outbound carrier dispatch"
         action={

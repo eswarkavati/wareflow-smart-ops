@@ -104,7 +104,7 @@ function Analytics() {
 
   return (
     <>
-      <PageHeader title="Operational Analytics" subtitle="Bangalore Hub — Warehouse Performance Intelligence" />
+      <PageHeader eyebrow="Intelligence" title="Operational Analytics" subtitle="Bangalore Hub — Warehouse Performance Intelligence" />
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         {kpis.map((k) => (
