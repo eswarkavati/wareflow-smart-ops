@@ -13,10 +13,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 import { useWf } from "@/lib/wf/store";
 import { fmtAgo, fmtTime } from "@/lib/wf/engine";
 import { GATES, gateStats } from "@/lib/wf/insights";
+import { gateCongestion } from "@/lib/wf/decisions";
 import type { GateEvent, GateId } from "@/lib/wf/types";
+
 
 export const Route = createFileRoute("/gate-entry")({
   ssr: false,
@@ -45,6 +48,9 @@ function GateEntry() {
   const [purpose, setPurpose] = useState<GateEvent["purpose"]>("Inbound");
   const [shipmentId, setShipmentId] = useState("none");
   const [filter, setFilter] = useState<"all" | GateId>("all");
+  const [dismissed, setDismissed] = useState(false);
+  const congestion = gateCongestion(state);
+
 
   const pending = state.inbound.filter((s) => s.status === "Scheduled");
   const inside = state.gateEvents.filter((g) => g.status === "Inside");
