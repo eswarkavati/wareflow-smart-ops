@@ -4,6 +4,7 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  ComposedChart,
   Legend,
   Line,
   LineChart,
@@ -129,15 +130,15 @@ export function DashboardStats() {
         <Panel title="Warehouse productivity" description="Tasks completed and efficiency by operator">
           <div className="h-60">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={productivity} margin={{ top: 6, right: 8, left: -18, bottom: 0 }}>
+              <ComposedChart data={productivity} margin={{ top: 6, right: 8, left: -18, bottom: 0 }}>
                 <CartesianGrid stroke="var(--color-border)" strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="name" tick={AXIS} tickLine={false} axisLine={false} />
                 <YAxis tick={AXIS} tickLine={false} axisLine={false} />
                 <Tooltip contentStyle={tooltipStyle} />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 <Bar dataKey="tasks" fill="var(--color-primary)" radius={[3, 3, 0, 0]} />
-                <Line type="monotone" dataKey="efficiency" stroke="var(--color-warning)" strokeWidth={2} />
-              </BarChart>
+                <Line type="monotone" dataKey="efficiency" stroke="var(--color-warning)" strokeWidth={2} dot={false} />
+              </ComposedChart>
             </ResponsiveContainer>
           </div>
         </Panel>

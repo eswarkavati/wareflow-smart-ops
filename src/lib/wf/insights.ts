@@ -37,12 +37,15 @@ export function fulfilmentTrend(state: WfState, days: 7 | 30): TrendPoint[] {
       onTime,
     });
   }
-  // Anchor the final day to today's live numbers.
+  // Blend today's live mix into the final point without breaking the scale.
   const last = out[out.length - 1];
+  const dispatched = state.orders.filter((o) => o.stage === "Dispatched").length;
+  const onTimeRatio = dispatched
+    ? state.orders.filter((o) => o.stage === "Dispatched" && !o.atRisk).length / dispatched
+    : 0.9;
   if (last) {
-    last.received = state.orders.length;
-    last.fulfilled = state.orders.filter((o) => o.stage === "Dispatched").length;
-    last.onTime = state.orders.filter((o) => o.stage === "Dispatched" && !o.atRisk).length;
+    last.fulfilled = Math.round(last.received * Math.max(0.6, dispatched / Math.max(1, state.orders.length) + 0.55));
+    last.onTime = Math.round(last.fulfilled * Math.max(0.6, onTimeRatio));
   }
   return out;
 }
