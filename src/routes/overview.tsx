@@ -74,19 +74,23 @@ function Overview() {
         }
       />
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7">
-        <Kpi label="Orders Today" value={today} tone="blue" />
-        <Kpi label="Pending" value={pending} tone="gray" />
-        <Kpi label="Orders at Risk" value={atRisk} tone={atRisk ? "red" : "green"} />
-        <Kpi label="Low Stock SKUs" value={lowSkus} tone={lowSkus > 5 ? "amber" : "green"} />
-        <Kpi label="Picking Queue" value={pickQueue} tone="blue" />
-        <Kpi label="Dispatch Due" value={dispatchDue} tone="amber" />
-        <Kpi label="Exceptions" value={openExc} tone={openExc ? "red" : "green"} />
+      <OpsBrief />
+
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+        <Kpi label="Orders Today" value={today} tone="blue" delta={8.4} to="/orders" />
+        <Kpi label="Orders At Risk" value={atRisk} tone={atRisk ? "red" : "green"} delta={-2.1} to="/orders" />
+        <Kpi label="Inventory Risk" value={`${lowSkus} SKUs`} tone={lowSkus > 5 ? "amber" : "green"} to="/replenishment" />
+        <Kpi label="Active Picking" value={pickQueue} tone="blue" delta={5.2} to="/picking" />
+        <Kpi label="Ready to Ship" value={dispatchDue} tone="amber" to="/shipping" />
+        <Kpi label="Open Exceptions" value={openExc} tone={openExc ? "red" : "green"} to="/exceptions" />
       </div>
 
       <div className="mt-4 grid gap-4 xl:grid-cols-[2fr_1fr]">
         <div className="space-y-4">
+          <DecisionConsole />
+
           <Panel title="Order flow" description="Volume currently sitting at each stage of fulfilment">
+
             <div className="flex flex-wrap items-stretch gap-2">
               {(
                 [
