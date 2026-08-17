@@ -139,7 +139,7 @@ export function WfProvider({ children }: { children: ReactNode }) {
 
   // Live operational simulation — small, realistic increments without reloads.
   useEffect(() => {
-    if (!state) return;
+    if (!state || !liveUpdates) return;
     const sim = window.setInterval(simulate, SIM_INTERVAL_MS);
     const sync = window.setInterval(() => {
       setSyncing(true);
@@ -153,7 +153,8 @@ export function WfProvider({ children }: { children: ReactNode }) {
       window.clearInterval(sync);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [!!state, simulate]);
+  }, [!!state, simulate, liveUpdates]);
+
 
   const log: Ctx["log"] = (draft, action, entity, from, to) => {
     draft.audit.unshift({
@@ -221,6 +222,9 @@ export function WfProvider({ children }: { children: ReactNode }) {
       nextSyncAt,
       syncing,
       refreshNow,
+      liveUpdates,
+      setLiveUpdates,
+
       login: (email) => {
         const acc = DEMO_ACCOUNTS.find((a) => a.email === email.trim().toLowerCase());
         const emp =
