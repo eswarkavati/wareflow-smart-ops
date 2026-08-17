@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 import { Panel, StatusBadge } from "@/components/wf/ui";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useWf } from "@/lib/wf/store";
@@ -50,7 +50,7 @@ const BOXES: Box[] = [
 
 function Racks({ box }: { box: Box }) {
   const { x, y, w, h, racks } = box;
-  const items: JSX.Element[] = [];
+  const items: ReactElement[] = [];
   if (racks === "h") {
     for (let i = 0; i < 5; i++) {
       const ry = y + 46 + i * 22;
