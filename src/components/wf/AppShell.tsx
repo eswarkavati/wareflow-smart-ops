@@ -305,26 +305,25 @@ export function AppShell({ navKey, children }: { navKey: NavKey; children: React
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-20 flex flex-wrap items-center gap-3 border-b border-border bg-card/95 px-4 py-2.5 backdrop-blur">
-          <Select defaultValue="BLR-01">
-            <SelectTrigger className="h-8 w-[186px] text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="BLR-01">BLR-01 · Bengaluru Hub</SelectItem>
-              <SelectItem value="DEL-02">DEL-02 · Delhi NCR</SelectItem>
-              <SelectItem value="MUM-03">MUM-03 · Bhiwandi</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2 rounded-md border border-border bg-surface px-2.5 py-1">
+            <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-xs font-medium">BLR-01 · Bangalore Hub</span>
+          </div>
           <StatusBadge value="Operational" tone="green" />
           <Clock />
           <div className="ml-auto flex items-center gap-2">
             <GlobalSearch />
             <Notifications />
           </div>
-          <span className="tabular hidden w-full text-[11px] text-muted-foreground sm:inline sm:w-auto">
-            Last updated {fmtAgo(state.updatedAt)}
+          <button
+            onClick={refreshNow}
+            title="Automatic sync every 30 minutes — click to sync now"
+            className="tabular flex items-center gap-1.5 rounded-md border border-border bg-card px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <RefreshCw className={cn("h-3 w-3", syncing && "animate-spin text-info")} />
+            {syncing ? "Syncing…" : `Last updated ${fmtAgo(lastSyncAt)}`}
             <span className="hidden">{tick}</span>
-          </span>
+          </button>
         </header>
 
         <main className="min-w-0 flex-1 p-4 lg:p-6">
