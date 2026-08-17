@@ -77,6 +77,9 @@ function rescore(draft: WfState) {
 export function WfProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<WfState | null>(null);
   const stateRef = useRef<WfState | null>(null);
+  const [lastSyncAt, setLastSyncAt] = useState(() => new Date().toISOString());
+  const [nextSyncAt, setNextSyncAt] = useState(() => new Date(Date.now() + SYNC_INTERVAL_MS).toISOString());
+  const [syncing, setSyncing] = useState(false);
 
   useEffect(() => {
     let initial: WfState | null = null;
