@@ -16,6 +16,7 @@ import { Panel } from "@/components/wf/ui";
 import { useWf } from "@/lib/wf/store";
 import { orderTrend, RANGE_LABEL, type RangeKey } from "@/lib/wf/analytics";
 import { stockStatus } from "@/lib/wf/engine";
+import type { Product } from "@/lib/wf/types";
 import { cn } from "@/lib/utils";
 
 const AXIS = { fontSize: 11, fill: "var(--color-muted-foreground)" } as const;
@@ -30,7 +31,7 @@ export const tooltipStyle = {
 
 const RANGES: RangeKey[] = ["today", "7d", "30d"];
 
-function inventoryBuckets(products: { damaged: number }[] & any[]) {
+function inventoryBuckets(products: Product[]) {
   const b = { Healthy: 0, "Low Stock": 0, "Out of Stock": 0, Damaged: 0 };
   products.forEach((p) => {
     if (p.damaged > 0) b.Damaged++;
