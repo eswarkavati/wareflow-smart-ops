@@ -466,7 +466,7 @@ export function AppShell({ navKey, children }: { navKey: NavKey; children: React
         </header>
 
         <main className="min-w-0 flex-1 p-4 lg:p-6">
-          <div className="mx-auto w-full max-w-[1560px]">
+          <div key={navKey} className="page-enter mx-auto w-full max-w-[1560px]">
             {denied ? (
               <div className="panel mx-auto mt-16 max-w-md p-8 text-center">
                 <BadgeCheck className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
