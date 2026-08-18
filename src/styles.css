@@ -117,45 +117,46 @@
 
 .dark {
   --background: oklch(0.1773 0.0089 264.32);
-  --foreground: oklch(0.98 0 0);
-  --surface: oklch(0.2303 0.0125 264.29);
-  --card: oklch(0.2303 0.0125 264.29);
-  --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.2303 0.0125 264.29);
-  --popover-foreground: oklch(0.98 0 0);
-  --primary: oklch(0.62 0.19 26.72);
+  --foreground: oklch(0.9702 0 0);
+  --surface: oklch(0.2136 0.0189 266.09);
+  --card: oklch(0.226 0.0167 264.16);
+  --card-foreground: oklch(0.9702 0 0);
+  --popover: oklch(0.226 0.0167 264.16);
+  --popover-foreground: oklch(0.9702 0 0);
+  --primary: oklch(0.6083 0.209 27.03);
   --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.28 0.012 264);
-  --secondary-foreground: oklch(0.98 0 0);
-  --muted: oklch(0.28 0.012 264);
-  --muted-foreground: oklch(0.72 0.015 264);
-  --accent: oklch(0.32 0.06 26);
+  --secondary: oklch(0.2136 0.0189 266.09);
+  --secondary-foreground: oklch(0.9702 0 0);
+  --muted: oklch(0.2136 0.0189 266.09);
+  --muted-foreground: oklch(0.7118 0.0129 286.07);
+  --accent: oklch(0.305 0.055 26);
   --accent-foreground: oklch(0.92 0.05 26);
-  --destructive: oklch(0.55 0.19 26.72);
+  --destructive: oklch(0.6083 0.209 27.03);
   --destructive-foreground: oklch(1 0 0);
   --success: oklch(0.68 0.16 149);
   --success-foreground: oklch(0.16 0 0);
   --warning: oklch(0.78 0.14 70);
   --warning-foreground: oklch(0.16 0 0);
-  --info: oklch(0.72 0.015 264);
+  --info: oklch(0.7118 0.0129 286.07);
   --info-foreground: oklch(0.16 0 0);
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 16%);
-  --ring: oklch(0.62 0.19 26.72);
-  --chart-1: oklch(0.62 0.19 26.72);
-  --chart-2: oklch(0.48 0.16 26.6);
-  --chart-3: oklch(0.75 0.11 27);
-  --chart-4: oklch(0.72 0.015 264);
+  --border: oklch(0.305 0.0211 265.89);
+  --input: oklch(0.305 0.0211 265.89);
+  --ring: oklch(0.6083 0.209 27.03);
+  --chart-1: oklch(0.6083 0.209 27.03);
+  --chart-2: oklch(0.673 0.2146 25.04);
+  --chart-3: oklch(0.78 0.11 27);
+  --chart-4: oklch(0.7118 0.0129 286.07);
   --chart-5: oklch(0.45 0.01 264);
-  --sidebar: oklch(0.2 0.01 264);
-  --sidebar-foreground: oklch(0.94 0 0);
-  --sidebar-primary: oklch(0.62 0.19 26.72);
+  --sidebar: oklch(0.2136 0.0189 266.09);
+  --sidebar-foreground: oklch(0.9702 0 0);
+  --sidebar-primary: oklch(0.6083 0.209 27.03);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(0.32 0.06 26);
+  --sidebar-accent: oklch(0.305 0.055 26);
   --sidebar-accent-foreground: oklch(0.95 0.04 26);
-  --sidebar-border: oklch(1 0 0 / 12%);
-  --sidebar-ring: oklch(0.62 0.19 26.72);
+  --sidebar-border: oklch(0.305 0.0211 265.89);
+  --sidebar-ring: oklch(0.6083 0.209 27.03);
 }
+
 
 
 @layer base {
@@ -186,4 +187,93 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: 0 1px 2px oklch(0.2 0.03 258 / 6%);
+}
+
+/* ---------- Global interaction polish (visual only) ---------- */
+
+@layer base {
+  button,
+  [role="button"],
+  a {
+    transition:
+      background-color 160ms ease,
+      border-color 160ms ease,
+      color 160ms ease,
+      box-shadow 160ms ease,
+      transform 160ms ease;
+  }
+  button:not(:disabled):active,
+  [role="button"]:not([aria-disabled="true"]):active {
+    transform: scale(0.985);
+  }
+
+  /* Table rows: subtle red tint on hover */
+  tbody tr {
+    transition: background-color 150ms ease;
+  }
+  tbody tr:hover {
+    background-color: color-mix(in oklab, var(--color-primary) 6%, transparent);
+  }
+
+  /* Panels / cards: subtle elevation + border emphasis */
+  .panel {
+    transition:
+      box-shadow 180ms ease,
+      border-color 180ms ease,
+      transform 180ms ease;
+  }
+  .panel:hover {
+    border-color: color-mix(in oklab, var(--color-primary) 28%, var(--color-border));
+    box-shadow: 0 6px 18px oklch(0.2 0.03 258 / 8%);
+  }
+  a.panel:hover {
+    transform: translateY(-1px);
+  }
+}
+
+/* Critical action emphasis: subtle red glow on hover */
+@utility action-emphasis {
+  &:hover {
+    box-shadow: 0 2px 10px color-mix(in oklab, var(--color-primary) 35%, transparent);
+  }
+}
+
+/* Page + card entrance motion */
+@utility page-enter {
+  animation: wf-page-enter 200ms ease-out both;
+}
+
+@utility card-enter {
+  animation: wf-card-enter 260ms ease-out both;
+}
+
+@keyframes wf-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes wf-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
