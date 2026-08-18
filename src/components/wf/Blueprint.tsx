@@ -206,7 +206,8 @@ export function Blueprint() {
               if (!z) return null;
               const active = sel === b.key;
               return (
-                <g key={b.key} className="cursor-pointer" onClick={() => setSel(b.key)}>
+                <g key={b.key} className="wf-zone cursor-pointer" onClick={() => setSel(b.key)}>
+                  <title>{`${z.label} — ${z.load}% capacity · ${z.status}`}</title>
                   <rect
                     x={b.x}
                     y={b.y}
@@ -214,8 +215,8 @@ export function Blueprint() {
                     height={b.h}
                     rx={2}
                     className={cn(
-                      "transition-colors",
-                      active ? "fill-primary/[0.07] stroke-primary" : "fill-card stroke-foreground/45 hover:stroke-primary/70",
+                      "transition-all duration-200",
+                      active ? "fill-primary/[0.07] stroke-primary" : "fill-card stroke-foreground/45 group-hover:stroke-primary",
                     )}
                     strokeWidth={active ? 1.8 : 1}
                   />
