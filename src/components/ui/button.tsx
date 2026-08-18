@@ -10,12 +10,13 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-sm hover:bg-[color-mix(in_oklab,var(--color-primary)_88%,black)] hover:shadow-[0_2px_10px_color-mix(in_oklab,var(--color-primary)_32%,transparent)]",
+          "bg-primary text-primary-foreground shadow-sm hover:-translate-y-px hover:bg-[color-mix(in_oklab,var(--color-primary)_88%,black)] hover:shadow-[0_4px_14px_color-mix(in_oklab,var(--color-primary)_34%,transparent)]",
         destructive:
           "bg-destructive text-destructive-foreground shadow-sm hover:bg-[color-mix(in_oklab,var(--color-destructive)_88%,black)] hover:shadow-[0_2px_10px_color-mix(in_oklab,var(--color-destructive)_30%,transparent)]",
         outline:
-          "border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground hover:border-primary/40",
-        secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
+          "border border-input bg-background shadow-sm hover:-translate-y-px hover:bg-accent hover:text-accent-foreground hover:border-primary/40",
+        secondary:
+          "border border-primary/30 bg-card text-primary shadow-sm hover:-translate-y-px hover:border-primary/60 hover:bg-accent hover:shadow-[0_4px_12px_color-mix(in_oklab,var(--color-primary)_18%,transparent)]",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },
