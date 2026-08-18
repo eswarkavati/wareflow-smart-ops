@@ -63,7 +63,7 @@ function LoginPage() {
 
   return (
     <div className="grid min-h-screen lg:grid-cols-[1.1fr_1fr]">
-      <div className="relative hidden overflow-hidden bg-sidebar lg:block">
+      <div className="dark relative hidden overflow-hidden bg-sidebar lg:block">
         <img
           src={warehouseImg}
           alt="Distribution warehouse racking and conveyor lines"
